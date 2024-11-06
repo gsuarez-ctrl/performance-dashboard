@@ -1,66 +1,43 @@
-// scripts/fetchData.js
-const { google } = require('googleapis');
-const fs = require('fs');
-const path = require('path');
+name: Update Dashboard Data
 
-async function fetchData() {
-    try {
-        // Configure Google Sheets API
-        const auth = new google.auth.GoogleAuth({
-            credentials: {
-                client_email: process.env.GOOGLE_CLIENT_EMAIL,
-                private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-            },
-            scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
-        });
+# Add permissions
+permissions:
+  contents: write
 
-        const sheets = google.sheets({ version: 'v4', auth });
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Runs every 6 hours
+  workflow_dispatch:  # Allows manual triggers
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3  # Updated to v3
+      with:
+        ref: main
         
-        // Fetch data from Google Sheet - Updated sheet name to 'followers'
-        const response = await sheets.spreadsheets.values.get({
-            spreadsheetId: process.env.SHEET_ID,
-            range: 'followers!A:P',  // Changed from Sheet1 to followers
-        });
-
-        const rows = response.data.values;
+    - name: Setup Node.js
+      uses: actions/setup-node@v3  # Updated to v3
+      with:
+        node-version: '16'
         
-        if (!rows || rows.length === 0) {
-            throw new Error('No data found');
-        }
-
-        // Process the data
-        const headers = rows[0];
-        const data = rows.slice(1).map(row => {
-            const entry = {};
-            headers.forEach((header, index) => {
-                if (index === 0) {
-                    // Convert date string to more readable format
-                    entry[header] = new Date(row[index]).toLocaleDateString();
-                } else if (!header.includes('Change') && !header.includes('Weekly')) {
-                    // Only include follower counts, not change or weekly percentage
-                    entry[header] = row[index] ? Number(row[index]) : null;
-                }
-            });
-            return entry;
-        });
-
-        // Create data directory if it doesn't exist
-        const dataDir = path.join(__dirname, '../data');
-        if (!fs.existsSync(dataDir)) {
-            fs.mkdirSync(dataDir, { recursive: true });
-        }
-
-        // Write to data file
-        fs.writeFileSync(
-            path.join(dataDir, 'followers.json'),
-            JSON.stringify(data, null, 2)
-        );
-
-        console.log('Data successfully fetched and saved');
-    } catch (error) {
-        console.error('Error:', error);
-        process.exit(1);
-    }
-}
-
-fetchData();
+    - name: Install dependencies
+      run: npm install googleapis
+        
+    - name: Fetch latest data
+      env:
+        GOOGLE_CLIENT_EMAIL: ${{ secrets.GOOGLE_CLIENT_EMAIL }}
+        GOOGLE_PRIVATE_KEY: ${{ secrets.GOOGLE_PRIVATE_KEY }}
+        SHEET_ID: ${{ secrets.SHEET_ID }}
+      run: |
+        mkdir -p data
+        node scripts/fetchData.js
+        
+    - name: Commit and push if changed
+      run: |
+        git config --global user.email "github-actions@github.com"
+        git config --global user.name "GitHub Actions"
+        git add data/followers.json
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Update dashboard data" && git push)
