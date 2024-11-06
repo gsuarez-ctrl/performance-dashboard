@@ -1,6 +1,13 @@
 import { google } from 'googleapis';
 import { NextResponse } from 'next/server';
 
+interface SheetData {
+  [key: string]: Array<{
+    date: string;
+    value: number;
+  }>;
+}
+
 export async function GET() {
   try {
     const auth = new google.auth.GoogleAuth({
@@ -21,11 +28,13 @@ export async function GET() {
     const [headers, ...dataRows] = rows;
     
     // Initialize processed data object
-    const processedData = {};
+    const processedData: SheetData = {};
     
     // Initialize accounts (columns B through P)
     headers.slice(1).forEach(account => {
-      processedData[account] = [];
+      if (typeof account === 'string') {
+        processedData[account] = [];
+      }
     });
 
     // Process each row
@@ -36,22 +45,30 @@ export async function GET() {
       row.slice(1).forEach((value, index) => {
         const account = headers[index + 1];
         if (account && value !== undefined && value !== '') {
-          processedData[account].push({
-            date: date,
-            value: parseFloat(value) || 0
-          });
+          const numericValue = parseFloat(value as string);
+          if (!isNaN(numericValue)) {
+            processedData[account].push({
+              date: date as string,
+              value: numericValue
+            });
+          }
         }
       });
     });
 
     // Sort data points by date for each account
     Object.keys(processedData).forEach(account => {
-      processedData[account].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      processedData[account].sort((a, b) => 
+        new Date(a.date).getTime() - new Date(b.date).getTime()
+      );
     });
 
     return NextResponse.json(processedData);
-  } catch (error: any) {
+  } catch (error) {
     console.error('API Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'Unknown error occurred' }, { status: 500 });
   }
 }
