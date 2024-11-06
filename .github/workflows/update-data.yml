@@ -1,0 +1,38 @@
+# .github/workflows/update-data.yml
+name: Update Dashboard Data
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Runs every 6 hours
+  workflow_dispatch:  # Allows manual triggers
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: main
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+        
+    - name: Install dependencies
+      run: npm install googleapis
+        
+    - name: Fetch latest data
+      env:
+        GOOGLE_CLIENT_EMAIL: ${{ secrets.GOOGLE_CLIENT_EMAIL }}
+        GOOGLE_PRIVATE_KEY: ${{ secrets.GOOGLE_PRIVATE_KEY }}
+        SHEET_ID: ${{ secrets.SHEET_ID }}
+      run: node scripts/fetchData.js
+        
+    - name: Commit and push if changed
+      run: |
+        git config --global user.email "github-actions@github.com"
+        git config --global user.name "GitHub Actions"
+        git add data/followers.json
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Update dashboard data" && git push)
