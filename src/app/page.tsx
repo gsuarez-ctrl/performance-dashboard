@@ -42,7 +42,6 @@ export default function Dashboard() {
       fetchData();
       calculateNextUpdateDay();
       
-      // Check every day at 1 AM if it's an update day
       const now = new Date();
       const tomorrow1AM = new Date(
         now.getFullYear(),
@@ -55,14 +54,12 @@ export default function Dashboard() {
       
       const dailyCheck = setInterval(() => {
         const today = new Date().getDay();
-        // 1 is Monday, 3 is Wednesday, 5 is Friday
         if ([1, 3, 5].includes(today)) {
           fetchData();
         }
         calculateNextUpdateDay();
-      }, 24 * 60 * 60 * 1000); // Check every 24 hours
+      }, 24 * 60 * 60 * 1000);
 
-      // Initial delay to start the daily checks at 1 AM
       setTimeout(() => {
         const today = new Date().getDay();
         if ([1, 3, 5].includes(today)) {
@@ -79,12 +76,11 @@ export default function Dashboard() {
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const today = new Date().getDay();
     
-    // Find the next update day
     let nextDay;
-    if (today < 1) nextDay = 1; // If Sunday, next is Monday
-    else if (today < 3) nextDay = 3; // If Monday or Tuesday, next is Wednesday
-    else if (today < 5) nextDay = 5; // If Wednesday or Thursday, next is Friday
-    else nextDay = 8; // If Friday or Saturday, next is Monday (add 8 to get to next week's Monday)
+    if (today < 1) nextDay = 1;
+    else if (today < 3) nextDay = 3;
+    else if (today < 5) nextDay = 5;
+    else nextDay = 8;
     
     const nextDate = new Date();
     nextDate.setDate(nextDate.getDate() + ((nextDay + 7 - today) % 7));
@@ -94,9 +90,13 @@ export default function Dashboard() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/sheets-data');
+      const baseUrl = process.env.NODE_ENV === 'development' 
+        ? '' 
+        : 'https://gsuarez-ctrl.github.io/performance-dashboard';
+      
+      const response = await fetch(`${baseUrl}/data.json`);
       const result = await response.json();
-      // Process the data
+      
       const processedData: DashboardData = {};
       Object.entries(result).forEach(([account, points]: [string, any]) => {
         processedData[account] = {
@@ -105,6 +105,7 @@ export default function Dashboard() {
           average: calculateAverage(points)
         };
       });
+      
       setRawData(processedData);
       setLastUpdate(new Date().toLocaleString());
     } catch (error) {
@@ -165,7 +166,6 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-900 p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header Section */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-white">Performance Dashboard</h1>
           <div className="flex items-center gap-4">
@@ -186,7 +186,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Performance Overview */}
         {best && worst && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div className="bg-white p-6 rounded-lg">
@@ -212,7 +211,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Individual Account Charts */}
         {loading ? (
           <div className="text-white">Loading...</div>
         ) : (
