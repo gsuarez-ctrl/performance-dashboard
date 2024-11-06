@@ -1,5 +1,8 @@
-# .github/workflows/update-data.yml
 name: Update Dashboard Data
+
+# Add permissions
+permissions:
+  contents: write
 
 on:
   schedule:
@@ -11,12 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3  # Updated to v3
       with:
         ref: main
         
     - name: Setup Node.js
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v3  # Updated to v3
       with:
         node-version: '16'
         
@@ -28,7 +31,9 @@ jobs:
         GOOGLE_CLIENT_EMAIL: ${{ secrets.GOOGLE_CLIENT_EMAIL }}
         GOOGLE_PRIVATE_KEY: ${{ secrets.GOOGLE_PRIVATE_KEY }}
         SHEET_ID: ${{ secrets.SHEET_ID }}
-      run: node scripts/fetchData.js
+      run: |
+        mkdir -p data
+        node scripts/fetchData.js
         
     - name: Commit and push if changed
       run: |
