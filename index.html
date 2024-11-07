@@ -172,11 +172,11 @@
 
         .chart-container {
             background: var(--card-bg);
-            padding: 1.5rem;
+            padding: 2rem;
             border-radius: 1rem;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             margin-bottom: 2rem;
-            height: 400px;
+            height: 500px;
         }
 
         .chart-header {
@@ -221,8 +221,8 @@
 
         .chart-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 1.5rem;
+            grid-template-columns: 1fr;
+            gap: 2rem;
         }
 
         .refresh-button {
@@ -248,12 +248,8 @@
         }
 
         @media (max-width: 1024px) {
-            .chart-grid {
-                grid-template-columns: 1fr;
-            }
-
             .chart-container {
-                height: 350px;
+                height: 450px;
             }
         }
 
@@ -273,7 +269,7 @@
             }
 
             .chart-container {
-                height: 300px;
+                height: 400px;
             }
         }
 
@@ -485,13 +481,14 @@
                         mode: 'index'
                     },
                     scales: {
-                       y: {
-                           beginAtZero: false,
-                           grid: {
-                               color: 'rgba(0,0,0,0.05)'
-                           },
-                           ticks: {
-                               callback: function(value) {
+                        y: {
+                            beginAtZero: false,
+                            grid: {
+                                color: 'rgba(0,0,0,0.05)'
+                            },
+                            ticks: {
+                                maxTicksLimit: 8,
+                                callback: function(value) {
                                    return value.toLocaleString();
                                }
                            }
@@ -499,6 +496,11 @@
                        x: {
                            grid: {
                                display: false
+                           },
+                           ticks: {
+                               maxTicksLimit: 6,
+                               maxRotation: 0,
+                               minRotation: 0
                            }
                        }
                    },
@@ -616,21 +618,33 @@
                                color: 'rgba(0,0,0,0.05)'
                            },
                            ticks: {
+                               maxTicksLimit: 6,
                                callback: value => value.toFixed(1) + '%'
                            }
                        },
                        x: {
                            grid: {
                                display: false
+                           },
+                           ticks: {
+                               maxTicksLimit: 6,
+                               maxRotation: 0,
+                               minRotation: 0
                            }
                        }
                    },
                    plugins: {
                        legend: {
                            position: 'bottom',
+                           align: 'start',
                            labels: {
+                               boxWidth: 12,
+                               boxHeight: 12,
                                usePointStyle: true,
-                               padding: 20
+                               padding: 20,
+                               filter: function(legendItem, data) {
+                                   return Math.abs(data.datasets[legendItem.datasetIndex].data[0]) > 0.5;
+                               }
                            }
                        },
                        tooltip: {
@@ -699,13 +713,10 @@
                );
                createAccountToggles(accounts);
                updateDashboard();
-
-               // Add auto-refresh
-               setInterval(refreshData, 300000); // Refresh every 5 minutes
+               setInterval(refreshData, 300000);
            }
        }
 
-       // Add loading state handlers
        window.addEventListener('error', function(e) {
            console.error('Dashboard error:', e);
            hideLoading();
@@ -713,4 +724,3 @@
    </script>
 </body>
 </html>
-                    
