@@ -1,25 +1,24 @@
 name: Update Dashboard Data
 
-# Add permissions
-permissions:
-  contents: write
-
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Runs every 6 hours
-  workflow_dispatch:  # Allows manual triggers
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   update-data:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3  # Updated to v3
+    - uses: actions/checkout@v3
       with:
         ref: main
         
     - name: Setup Node.js
-      uses: actions/setup-node@v3  # Updated to v3
+      uses: actions/setup-node@v3
       with:
         node-version: '16'
         
@@ -40,4 +39,5 @@ jobs:
         git config --global user.email "github-actions@github.com"
         git config --global user.name "GitHub Actions"
         git add data/followers.json
+        git add package-lock.json
         git diff --quiet && git diff --staged --quiet || (git commit -m "Update dashboard data" && git push)
