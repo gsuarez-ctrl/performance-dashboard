@@ -5,6 +5,8 @@ const path = require('path');
 
 async function fetchData() {
     try {
+        console.log('Starting data fetch...');
+        
         // Configure Google Sheets API
         const auth = new google.auth.GoogleAuth({
             credentials: {
@@ -16,17 +18,21 @@ async function fetchData() {
 
         const sheets = google.sheets({ version: 'v4', auth });
         
-        // Fetch data from Google Sheet - Updated sheet name to 'followers'
+        console.log('Fetching from sheet ID:', process.env.SHEET_ID);
+        
+        // Fetch data from Google Sheet - make sure range matches your sheet name
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: process.env.SHEET_ID,
-            range: 'followers!A:P',  // Changed from Sheet1 to followers
+            range: 'followers!A:P',  // Make sure this matches your sheet name
         });
 
         const rows = response.data.values;
         
         if (!rows || rows.length === 0) {
-            throw new Error('No data found');
+            throw new Error('No data found in sheet');
         }
+
+        console.log(`Found ${rows.length} rows of data`);
 
         // Process the data
         const headers = rows[0];
@@ -51,14 +57,14 @@ async function fetchData() {
         }
 
         // Write to data file
-        fs.writeFileSync(
-            path.join(dataDir, 'followers.json'),
-            JSON.stringify(data, null, 2)
-        );
-
-        console.log('Data successfully fetched and saved');
+        const outputPath = path.join(dataDir, 'followers.json');
+        fs.writeFileSync(outputPath, JSON.stringify(data, null, 2));
+        
+        console.log('Data successfully written to:', outputPath);
+        console.log('Sample of processed data:', data[0]);
+        
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error in fetchData:', error);
         process.exit(1);
     }
 }

@@ -2,8 +2,8 @@ name: Update Dashboard Data
 
 on:
   schedule:
-    - cron: '0 */6 * * *'
-  workflow_dispatch:
+    - cron: '0 12 * * *'  # Runs at 12:00 UTC (noon) every day
+  workflow_dispatch:       # Allows manual triggers
 
 permissions:
   contents: write
@@ -24,20 +24,29 @@ jobs:
         
     - name: Install dependencies
       run: npm ci
-        
+      
     - name: Fetch latest data
       env:
         GOOGLE_CLIENT_EMAIL: ${{ secrets.GOOGLE_CLIENT_EMAIL }}
         GOOGLE_PRIVATE_KEY: ${{ secrets.GOOGLE_PRIVATE_KEY }}
         SHEET_ID: ${{ secrets.SHEET_ID }}
       run: |
+        echo "Starting daily data fetch process..."
         mkdir -p data
         node scripts/fetchData.js
         
+    - name: Check for changes
+      id: check_changes
+      run: |
+        git status
+        echo "Has changes: $(git status --porcelain)"
+        echo "::set-output name=has_changes::$(git status --porcelain | wc -l)"
+        
     - name: Commit and push if changed
+      if: steps.check_changes.outputs.has_changes > 0
       run: |
         git config --global user.email "github-actions@github.com"
         git config --global user.name "GitHub Actions"
         git add data/followers.json
-        git status
-        git diff --quiet || (git commit -am "Update dashboard data" && git push)
+        git commit -m "Update dashboard data [skip ci]"
+        git push
