@@ -23,7 +23,7 @@ async function fetchData() {
         // Fetch data from Google Sheet - make sure range matches your sheet name
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: process.env.SHEET_ID,
-            range: 'followers!A:P',  // Make sure this matches your sheet name
+            range: 'followers!A:Q',  // Make sure this matches your sheet name
         });
 
         const rows = response.data.values;
