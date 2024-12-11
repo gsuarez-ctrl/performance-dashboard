@@ -12,7 +12,8 @@ let currentData = null;
 async function initDashboard() {
     try {
         toggleLoading(true);
-        const response = await fetch('/data/followers.json');
+        // Updated fetch path for GitHub Pages
+        const response = await fetch('/instagram-tracker/data/followers.json');
         currentData = await response.json();
         
         initializeCharts();
@@ -23,6 +24,7 @@ async function initDashboard() {
     } catch (error) {
         console.error('Dashboard initialization error:', error);
         alert('Error loading dashboard data');
+        toggleLoading(false);
     }
 }
 
