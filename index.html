@@ -3,906 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram Analytics Dashboard</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <meta name="description" content="Social Media Analytics Dashboard">
+    <meta name="author" content="Instagram Follower Tracker">
+    <title>Social Media Analytics Dashboard</title>
+    
+    <!-- Stylesheets -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <style>
-        :root {
-            --primary: #4f46e5;
-            --secondary: #6366f1;
-            --success: #22c55e;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --background: #f8fafc;
-            --card-bg: #ffffff;
-            --text: #1e293b;
-            --text-light: #64748b;
-            --border: #e2e8f0;
+        .tab-active {
+            border-bottom: 2px solid #4A90E2;
+            color: #4A90E2;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: var(--background);
-            color: var(--text);
-            line-height: 1.5;
-        }
-
-        .login-container {
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-        }
-
-        .login-card {
-            background: var(--card-bg);
-            padding: 2.5rem;
-            border-radius: 1rem;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .login-header h1 {
-            color: var(--primary);
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        input {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-
-        button {
-            width: 100%;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 0.5rem;
-            background: var(--primary);
-            color: white;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        button:hover {
-            background: var(--secondary);
-        }
-
-        .error {
-            color: var(--danger);
-            text-align: center;
-            margin-top: 1rem;
-            font-size: 0.875rem;
-        }
-
-        .dashboard {
-            padding: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .dashboard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .dashboard-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .performance-summary {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
         .performance-card {
-            background: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: transform 0.2s ease;
-        }
-
-        .performance-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .performance-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-            color: var(--text-light);
-        }
-
-        .performance-header i {
-            font-size: 1.25rem;
-        }
-
-        .performance-header h3 {
-            font-size: 1rem;
-            font-weight: 600;
-        }
-
-        .performer-content {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-        }
-
-        .performer-main {
-            flex-grow: 1;
-        }
-
-        .performer-account {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .performer-stats {
-            display: flex;
-            gap: 1.5rem;
-        }
-
-        .performer-stat {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .performer-label {
-            font-size: 0.875rem;
-            color: var(--text-light);
-        }
-
-        .performer-value {
-            font-size: 1.125rem;
-            font-weight: 500;
-        }
-
-        .performer-trend {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 500;
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            background: rgba(0,0,0,0.03);
-        }
-
-        .best .performer-trend {
-            color: var(--success);
-        }
-
-        .worst .performer-trend {
-            color: var(--danger);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: transform 0.2s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .stat-title {
-            color: var(--text-light);
-            font-size: 0.875rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-change {
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-        .positive {
-            color: var(--success);
-        }
-
-        .negative {
-            color: var(--danger);
-        }
-
-        .chart-container {
-            background: var(--card-bg);
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            margin-bottom: 2rem;
-            height: 500px;
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .chart-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-        }
-
-        .legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            cursor: pointer;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            transition: background-color 0.2s ease;
-        }
-
-        .legend-item:hover {
-            background-color: var(--background);
-        }
-
-        .legend-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 2px;
-        }
-
-        .chart-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 2rem;
-        }
-
-        .refresh-button {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-            width: auto;
-        }
-
-        .refresh-button i {
             transition: transform 0.3s ease;
         }
-
-        .refresh-button:hover i {
-            transform: rotate(180deg);
+        .performance-card:hover {
+            transform: translateY(-5px);
         }
-
-        .last-updated {
-            font-size: 0.875rem;
-            color: var(--text-light);
+        .chart-container {
+            min-height: 400px;
         }
-
-        @media (max-width: 1024px) {
-            .performance-summary {
-                grid-template-columns: 1fr;
-            }
-
-            .chart-container {
-                height: 450px;
-            }
+        #loading {
+            background-color: rgba(255, 255, 255, 0.9);
         }
-
-        @media (max-width: 768px) {
-            .dashboard {
-                padding: 1rem;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .dashboard-header {
-                flex-direction: column;
-                gap: 1rem;
-                align-items: flex-start;
-            }
-
-            .performer-content {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .performer-trend {
-                align-self: flex-start;
-            }
-
-            .chart-container {
-                height: 400px;
-            }
+        .growth-positive {
+            color: #10B981;
         }
-
-        .loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            display: none;
+        .growth-negative {
+            color: #EF4444;
         }
-
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid var(--border);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .nav-tab {
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
         }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+        .nav-tab:hover {
+            background-color: #F3F4F6;
         }
     </style>
 </head>
-<body>
-    <div id="loading" class="loading">
-        <div class="loading-spinner"></div>
+<body class="bg-gray-100">
+    <!-- Loading Spinner -->
+    <div id="loading" class="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 z-50">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
     </div>
 
-    <div id="loginPage" class="login-container">
-        <div class="login-card">
-            <div class="login-header">
-                <h1>Analytics Dashboard</h1>
-                <p>Enter your credentials to continue</p>
-            </div>
-            <div class="form-group">
-                <input type="password" id="password" placeholder="Enter password" autocomplete="current-password">
-                <button onclick="authenticate()">Login</button>
-            </div>
-            <div id="loginError" class="error"></div>
-        </div>
-    </div>
-
-    <div id="dashboardPage" class="dashboard" style="display: none;">
-        <div class="dashboard-header">
+    <!-- Main Dashboard Container -->
+    <div id="dashboardContainer" class="container mx-auto px-4 py-8 hidden">
+        <!-- Dashboard Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 space-y-4 md:space-y-0">
             <div>
-                <h1 class="dashboard-title">Social Media Analytics</h1>
-                <p class="last-updated">Last updated: <span id="lastUpdated">Loading...</span></p>
+                <h1 class="text-3xl font-bold text-gray-800">Social Media Analytics</h1>
+                <p class="text-gray-600 mt-2">Last updated: <span id="lastUpdated">Loading...</span></p>
             </div>
-            <button onclick="refreshData()" class="refresh-button">
-                <i class="fas fa-sync-alt"></i> Refresh Data
-            </button>
-        </div>
-
-        <div class="performance-summary">
-            <div class="performance-card best">
-                <div class="performance-header">
-                    <i class="fas fa-arrow-trend-up"></i>
-                    <h3>Best Performer</h3>
-                </div>
-                <div id="bestPerformer"></div>
-            </div>
-            <div class="performance-card worst">
-                <div class="performance-header">
-                    <i class="fas fa-arrow-trend-down"></i>
-                    <h3>Needs Attention</h3>
-                </div>
-                <div id="worstPerformer"></div>
+            <div class="flex space-x-4">
+                <button id="exportBtn" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors">
+                    Export Data
+                </button>
+                <button id="refreshBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">
+                    Refresh Data
+                </button>
             </div>
         </div>
 
-        <div class="stats-grid" id="statsGrid"></div>
+        <!-- Dashboard Navigation -->
+        <nav class="mb-8 border-b border-gray-200">
+            <div class="flex space-x-4">
+                <button id="clientsTab" class="nav-tab tab-active">
+                    Client Accounts
+                </button>
+                <button id="competitorsTab" class="nav-tab">
+                    Competitor Analysis
+                </button>
+            </div>
+        </nav>
 
-        <div class="chart-grid">
-            <div class="chart-container">
-                <div class="chart-header">
-                    <h2 class="chart-title">Follower Growth Trends</h2>
+        <!-- Clients Dashboard View -->
+        <div id="clientsView" class="space-y-8">
+            <!-- Performance Summary -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Best Performer Card -->
+                <div class="bg-white rounded-lg shadow p-6 performance-card">
+                    <h3 class="text-lg font-semibold text-green-600 mb-2">Best Performer</h3>
+                    <div id="bestPerformerClient" class="space-y-2">
+                        <p class="text-2xl font-bold">Loading...</p>
+                        <p class="text-gray-600">Growth: <span class="text-green-500">--</span></p>
+                        <p class="text-sm text-gray-500">Times as best performer: <span>--</span></p>
+                        <div class="mt-2 text-sm text-gray-500">
+                            <p>Current Followers: <span class="font-medium">--</span></p>
+                            <p>Monthly Change: <span class="font-medium">--</span></p>
+                        </div>
+                    </div>
                 </div>
-                <div id="accountToggles" class="legend"></div>
-                <canvas id="followersChart"></canvas>
+
+                <!-- Worst Performer Card -->
+                <div class="bg-white rounded-lg shadow p-6 performance-card">
+                    <h3 class="text-lg font-semibold text-red-600 mb-2">Needs Attention</h3>
+                    <div id="worstPerformerClient" class="space-y-2">
+                        <p class="text-2xl font-bold">Loading...</p>
+                        <p class="text-gray-600">Growth: <span class="text-red-500">--</span></p>
+                        <p class="text-sm text-gray-500">Times needing attention: <span>--</span></p>
+                        <div class="mt-2 text-sm text-gray-500">
+                            <p>Current Followers: <span class="font-medium">--</span></p>
+                            <p>Monthly Change: <span class="font-medium">--</span></p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="chart-container">
-                <div class="chart-header">
-                    <h2 class="chart-title">Growth Rate Comparison</h2>
+            <!-- Client Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Monthly Growth Trends -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold mb-4">Monthly Growth Trends</h3>
+                    <div id="clientGrowthChart" class="chart-container"></div>
                 </div>
-                <canvas id="growthChart"></canvas>
+
+                <!-- Performance History -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold mb-4">Performance History</h3>
+                    <div id="clientPerformanceHistory" class="chart-container"></div>
+                </div>
+            </div>
+
+            <!-- Historical Performance Table -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold mb-4">Historical Performance Summary</h3>
+                <div class="overflow-x-auto">
+                    <table id="clientHistoryTable" class="min-w-full table-auto">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Times Best</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Times Worst</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Average Growth</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <div class="chart-container">
-            <div class="chart-header">
-                <h2 class="chart-title">Weekly Performance</h2>
+        <!-- Competitors Dashboard View -->
+        <div id="competitorsView" class="space-y-8 hidden">
+            <!-- Competitor Performance Summary -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Leading Competitor Card -->
+                <div class="bg-white rounded-lg shadow p-6 performance-card">
+                    <h3 class="text-lg font-semibold text-blue-600 mb-2">Leading Competitor</h3>
+                    <div id="bestPerformerCompetitor" class="space-y-2">
+                        <p class="text-2xl font-bold">Loading...</p>
+                        <p class="text-gray-600">Growth: <span class="text-blue-500">--</span></p>
+                        <div class="mt-2 text-sm text-gray-500">
+                            <p>Current Followers: <span class="font-medium">--</span></p>
+                            <p>Monthly Change: <span class="font-medium">--</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slowest Growth Card -->
+                <div class="bg-white rounded-lg shadow p-6 performance-card">
+                    <h3 class="text-lg font-semibold text-gray-600 mb-2">Slowest Growth</h3>
+                    <div id="worstPerformerCompetitor" class="space-y-2">
+                        <p class="text-2xl font-bold">Loading...</p>
+                        <p class="text-gray-600">Growth: <span class="text-gray-500">--</span></p>
+                        <div class="mt-2 text-sm text-gray-500">
+                            <p>Current Followers: <span class="font-medium">--</span></p>
+                            <p>Monthly Change: <span class="font-medium">--</span></p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <canvas id="weeklyChart"></canvas>
+
+            <!-- Competitor Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Growth Comparison -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold mb-4">Competitor Growth Comparison</h3>
+                    <div id="competitorGrowthChart" class="chart-container"></div>
+                </div>
+
+                <!-- Market Share -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold mb-4">Market Share Trend</h3>
+                    <div id="competitorMarketShare" class="chart-container"></div>
+                </div>
+            </div>
+
+            <!-- Competitor Comparison Table -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold mb-4">Competitor Comparison</h3>
+                <div class="overflow-x-auto">
+                    <table id="competitorComparisonTable" class="min-w-full table-auto">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Competitor</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Followers</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monthly Growth</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Market Share</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script>
-        const DASHBOARD_PASSWORD = 'PalasseDigital';
-        let mainChart, growthChart, weeklyChart;
-        let currentData = [];
-
-        const colors = [
-            '#4f46e5', '#ef4444', '#22c55e', '#f59e0b', '#06b6d4',
-            '#8b5cf6', '#ec4899', '#f97316', '#14b8a6', '#6366f1',
-            '#d946ef', '#0ea5e9', '#84cc16', '#7c3aed', '#dc2626'
-        ];
-
-        function showLoading() {
-            document.getElementById('loading').style.display = 'flex';
-        }
-
-        function hideLoading() {
-            document.getElementById('loading').style.display = 'none';
-        }
-
-        function authenticate() {
-            const password = document.getElementById('password').value;
-            if (password === DASHBOARD_PASSWORD) {
-                document.getElementById('loginPage').style.display = 'none';
-                document.getElementById('dashboardPage').style.display = 'block';
-                document.getElementById('loginError').textContent = '';
-                initDashboard();
-            } else {
-                document.getElementById('loginError').textContent = 'Invalid password';
-            }
-        }
-
-        document.getElementById('password').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                authenticate();
-            }
-        });
-
-        async function fetchData() {
-            try {
-                showLoading();
-                const response = await fetch('data/followers.json');
-                if (!response.ok) throw new Error('Failed to fetch data');
-               const data = await response.json();
-               document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
-               return data;
-           } catch (error) {
-               console.error('Error fetching data:', error);
-               return [];
-           } finally {
-               hideLoading();
-           }
-       }
-
-       function calculateGrowth(data) {
-           const accounts = Object.keys(data[0]).filter(key => 
-               key !== 'Date' && !key.includes('Change') && !key.includes('Weekly')
-           );
-
-           return accounts.map(account => {
-               const startValue = data[0][account];
-               const endValue = data[data.length - 1][account];
-               const growth = ((endValue - startValue) / startValue) * 100;
-               return {
-                   account,
-                   growth: growth.toFixed(2),
-                   totalGrowth: endValue - startValue,
-                   current: endValue
-               };
-           });
-       }
-
-       function updatePerformanceSummary(growthData) {
-           const sortedData = [...growthData].sort((a, b) => parseFloat(b.growth) - parseFloat(a.growth));
-           const bestPerformer = sortedData[0];
-           const worstPerformer = sortedData[sortedData.length - 1];
-
-           // Calculate weekly trend
-           const lastTwoWeeks = currentData.slice(-2);
-           const getWeeklyTrend = (account) => {
-               if (lastTwoWeeks.length < 2) return 0;
-               const currentWeek = lastTwoWeeks[1][account];
-               const lastWeek = lastTwoWeeks[0][account];
-               return ((currentWeek - lastWeek) / lastWeek * 100).toFixed(2);
-           };
-
-           // Update Best Performer
-           document.getElementById('bestPerformer').innerHTML = `
-               <div class="performer-content">
-                   <div class="performer-main">
-                       <div class="performer-account">${bestPerformer.account}</div>
-                       <div class="performer-stats">
-                           <div class="performer-stat">
-                               <span class="performer-label">Total Growth</span>
-                               <span class="performer-value">${Math.abs(bestPerformer.growth)}%</span>
-                           </div>
-                           <div class="performer-stat">
-                               <span class="performer-label">Current Followers</span>
-                               <span class="performer-value">${bestPerformer.current.toLocaleString()}</span>
-                           </div>
-                       </div>
-                   </div>
-                   <div class="performer-trend">
-                       <i class="fas fa-arrow-up"></i>
-                       ${getWeeklyTrend(bestPerformer.account)}% this week
-                   </div>
-               </div>
-           `;
-
-           // Update Worst Performer
-           document.getElementById('worstPerformer').innerHTML = `
-               <div class="performer-content">
-                   <div class="performer-main">
-                       <div class="performer-account">${worstPerformer.account}</div>
-                       <div class="performer-stats">
-                           <div class="performer-stat">
-                               <span class="performer-label">Total Growth</span>
-                               <span class="performer-value">${Math.abs(worstPerformer.growth)}%</span>
-                           </div>
-                           <div class="performer-stat">
-                               <span class="performer-label">Current Followers</span>
-                               <span class="performer-value">${worstPerformer.current.toLocaleString()}</span>
-                           </div>
-                       </div>
-                   </div>
-                   <div class="performer-trend">
-                       <i class="fas fa-arrow-down"></i>
-                       ${getWeeklyTrend(worstPerformer.account)}% this week
-                   </div>
-               </div>
-           `;
-       }
-
-       function updateStatsGrid(growthData) {
-           const statsGrid = document.getElementById('statsGrid');
-           statsGrid.innerHTML = '';
-
-           growthData.forEach(({ account, growth, totalGrowth, current }) => {
-               const card = document.createElement('div');
-               card.className = 'stat-card';
-               card.innerHTML = `
-                   <div class="stat-title">${account}</div>
-                   <div class="stat-value">${current.toLocaleString()}</div>
-                   <div class="stat-change ${parseFloat(growth) >= 0 ? 'positive' : 'negative'}">
-                       <i class="fas fa-${parseFloat(growth) >= 0 ? 'arrow-up' : 'arrow-down'}"></i>
-                       ${Math.abs(growth)}% (${Math.abs(totalGrowth)} followers)
-                   </div>
-               `;
-               statsGrid.appendChild(card);
-           });
-       }
-
-       function createMainChart(data) {
-           const ctx = document.getElementById('followersChart').getContext('2d');
-           const accounts = Object.keys(data[0]).filter(key => 
-               key !== 'Date' && !key.includes('Change') && !key.includes('Weekly')
-           );
-
-           const datasets = accounts.map((account, index) => ({
-               label: account,
-               data: data.map(d => d[account]),
-               borderColor: colors[index % colors.length],
-               backgroundColor: colors[index % colors.length] + '20',
-               tension: 0.4,
-               fill: true,
-               pointRadius: 0,
-               borderWidth: 2
-           }));
-
-           return new Chart(ctx, {
-               type: 'line',
-               data: {
-                   labels: data.map(d => d.Date),
-                   datasets
-               },
-               options: {
-                   responsive: true,
-                   maintainAspectRatio: false,
-                   interaction: {
-                       intersect: false,
-                       mode: 'index'
-                   },
-                   scales: {
-                       y: {
-                           beginAtZero: false,
-                           grid: {
-                               color: 'rgba(0,0,0,0.05)'
-                           },
-                           ticks: {
-                               maxTicksLimit: 8,
-                               callback: function(value) {
-                                   return value.toLocaleString();
-                               }
-                           }
-                       },
-                       x: {
-                           grid: {
-                               display: false
-                           },
-                           ticks: {
-                               maxTicksLimit: 6,
-                               maxRotation: 0,
-                               minRotation: 0
-                           }
-                       }
-                   },
-                   plugins: {
-                       legend: {
-                           display: false
-                       },
-                       tooltip: {
-                           mode: 'index',
-                           intersect: false,
-                           callbacks: {
-                               label: function(context) {
-                                   return context.dataset.label + ': ' + context.parsed.y.toLocaleString();
-                               }
-                           }
-                       }
-                   }
-               }
-           });
-       }
-
-       function createGrowthChart(growthData) {
-           const ctx = document.getElementById('growthChart').getContext('2d');
-           const sortedData = [...growthData].sort((a, b) => parseFloat(b.growth) - parseFloat(a.growth));
-
-           return new Chart(ctx, {
-               type: 'bar',
-               data: {
-                   labels: sortedData.map(d => d.account),
-                   datasets: [{
-                       label: 'Growth Rate (%)',
-                       data: sortedData.map(d => parseFloat(d.growth)),
-                       backgroundColor: sortedData.map(d => 
-                           parseFloat(d.growth) >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'
-                       ),
-                       borderColor: sortedData.map(d => 
-                           parseFloat(d.growth) >= 0 ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)'
-                       ),
-                       borderWidth: 1
-                   }]
-               },
-               options: {
-                   indexAxis: 'y',
-                   responsive: true,
-                   maintainAspectRatio: false,
-                   plugins: {
-                       legend: {
-                           display: false
-                       }
-                   },
-                   scales: {
-                       x: {
-                           grid: {
-                               color: 'rgba(0,0,0,0.05)'
-                           },
-                           ticks: {
-                               callback: value => value.toFixed(1) + '%'
-                           }
-                       },
-                       y: {
-                           grid: {
-                               display: false
-                           }
-                       }
-                   }
-               }
-           });
-       }
-
-       function createWeeklyChart(data) {
-           const ctx = document.getElementById('weeklyChart').getContext('2d');
-           const accounts = Object.keys(data[0]).filter(key => 
-               key !== 'Date' && !key.includes('Change') && !key.includes('Weekly')
-           );
-
-           const weeklyGrowth = accounts.map(account => {
-               const values = data.map(d => d[account]);
-               const weeklyChanges = [];
-               for (let i = 1; i < values.length; i++) {
-                   const change = ((values[i] - values[i-1]) / values[i-1]) * 100;
-                   weeklyChanges.push(change);
-               }
-               return {
-                   account,
-                   changes: weeklyChanges
-               };
-           });
-
-           const datasets = weeklyGrowth.map((account, index) => ({
-               label: account.account,
-               data: account.changes,
-               borderColor: colors[index % colors.length],
-               backgroundColor: colors[index % colors.length] + '20',
-               tension: 0.4,
-               fill: false,
-               pointRadius: 2
-           }));
-
-           return new Chart(ctx, {
-               type: 'line',
-               data: {
-                   labels: data.slice(1).map(d => d.Date),
-                   datasets
-               },
-               options: {
-                   responsive: true,
-                   maintainAspectRatio: false,
-                   interaction: {
-                       intersect: false,
-                       mode: 'index'
-                   },
-                   scales: {
-                       y: {
-                           grid: {
-                               color: 'rgba(0,0,0,0.05)'
-                           },
-                           ticks: {
-                               maxTicksLimit: 6,
-                               callback: value => value.toFixed(1) + '%'
-                           }
-                       },
-                       x: {
-                           grid: {
-                               display: false
-                           },
-                           ticks: {
-                               maxTicksLimit: 6,
-                               maxRotation: 0,
-                               minRotation: 0
-                           }
-                       }
-                   },
-                   plugins: {
-                       legend: {
-                           position: 'bottom',
-                           align: 'start',
-                           labels: {
-                               boxWidth: 12,
-                               boxHeight: 12,
-                               usePointStyle: true,
-                               padding: 20,
-                               filter: function(legendItem, data) {
-                                   return Math.abs(data.datasets[legendItem.datasetIndex].data[0]) > 0.5;
-                               }
-                           }
-                       },
-                       tooltip: {
-                           callbacks: {
-                               label: (context) => {
-                                   return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}%`;
-                               }
-                           }
-                       }
-                   }
-               }
-           });
-       }
-
-       function createAccountToggles(accounts) {
-           const container = document.getElementById('accountToggles');
-           container.innerHTML = '';
-           
-           accounts.forEach((account, index) => {
-               const item = document.createElement('div');
-               item.className = 'legend-item';
-               item.innerHTML = `
-                   <div class="legend-color" style="background-color: ${colors[index % colors.length]}"></div>
-                   <span>${account}</span>
-               `;
-               item.onclick = () => toggleDataset(index);
-               container.appendChild(item);
-           });
-       }
-
-       function toggleDataset(index) {
-           const isDatasetVisible = mainChart.isDatasetVisible(index);
-           mainChart.setDatasetVisibility(index, !isDatasetVisible);
-           mainChart.update();
-
-           const legendItems = document.querySelectorAll('.legend-item');
-           legendItems[index].style.opacity = isDatasetVisible ? '0.5' : '1';
-       }
-
-       async function refreshData() {
-           const newData = await fetchData();
-           if (newData.length > 0) {
-               currentData = newData;
-               updateDashboard();
-           }
-       }
-
-       function updateDashboard() {
-           const growthData = calculateGrowth(currentData);
-           updatePerformanceSummary(growthData);
-           updateStatsGrid(growthData);
-
-           if (mainChart) mainChart.destroy();
-           if (growthChart) growthChart.destroy();
-           if (weeklyChart) weeklyChart.destroy();
-
-           mainChart = createMainChart(currentData);
-           growthChart = createGrowthChart(growthData);
-           weeklyChart = createWeeklyChart(currentData);
-       }
-
-       async function initDashboard() {
-           currentData = await fetchData();
-           if (currentData.length > 0) {
-               const accounts = Object.keys(currentData[0]).filter(key => 
-                   key !== 'Date' && !key.includes('Change') && !key.includes('Weekly')
-               );
-               createAccountToggles(accounts);
-               updateDashboard();
-               setInterval(refreshData, 300000);
-           }
-       }
-
-       window.addEventListener('error', function(e) {
-           console.error('Dashboard error:', e);
-           hideLoading();
-       });
-   </script>
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash/4.17.21/lodash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
