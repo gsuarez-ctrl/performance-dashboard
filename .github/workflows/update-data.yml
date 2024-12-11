@@ -25,15 +25,19 @@ jobs:
     - name: Install dependencies
       run: npm install
         
+    - name: Create directories
+      run: |
+        mkdir -p data
+        mkdir -p docs/data
+        
     - name: Fetch latest data
       env:
         GOOGLE_CLIENT_EMAIL: ${{ secrets.GOOGLE_CLIENT_EMAIL }}
         GOOGLE_PRIVATE_KEY: ${{ secrets.GOOGLE_PRIVATE_KEY }}
         SHEET_ID: ${{ secrets.SHEET_ID }}
       run: |
-        mkdir -p data
         node scripts/fetchData.js
-        cp -r data/* docs/data/
+        cp data/* docs/data/
         
     - name: Check for changes
       id: check_changes
