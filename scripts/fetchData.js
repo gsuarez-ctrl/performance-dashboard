@@ -7,15 +7,15 @@ async function fetchSheetData(auth) {
     const spreadsheetId = process.env.SHEET_ID;
 
     try {
-        // Fetch both client and competitor data
+        // Fetch both client and competitor data with proper range formatting
         const [clientResponse, competitorResponse] = await Promise.all([
             sheets.spreadsheets.values.get({
                 spreadsheetId,
-                range: 'followers!A:Q',
+                range: 'clients!A:Z'  // Updated range format
             }),
             sheets.spreadsheets.values.get({
                 spreadsheetId,
-                range: 'competitors!A:H',
+                range: 'competitors!A:Z'  // Updated range format
             })
         ]);
 
@@ -123,7 +123,6 @@ function calculatePerformanceHistory(data) {
 
 async function main() {
     try {
-        // Set up Google Sheets auth
         const auth = new google.auth.GoogleAuth({
             credentials: {
                 client_email: process.env.GOOGLE_CLIENT_EMAIL,
@@ -132,14 +131,14 @@ async function main() {
             scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
         });
 
-        // Fetch data from both sheets
+        console.log('Fetching data from sheets...');
         const sheetData = await fetchSheetData(auth);
 
-        // Process both datasets
+        console.log('Processing client data...');
         const clientData = processData(sheetData.clients);
+        console.log('Processing competitor data...');
         const competitorData = processData(sheetData.competitors);
 
-        // Prepare processed data structure
         const processedData = {
             clients: {
                 data: clientData,
@@ -154,7 +153,6 @@ async function main() {
             lastUpdated: new Date().toISOString()
         };
 
-        // Write processed data
         const outputPath = path.join(__dirname, '../data/processed_followers.json');
         fs.writeFileSync(outputPath, JSON.stringify(processedData, null, 2));
         
