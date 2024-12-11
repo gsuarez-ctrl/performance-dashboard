@@ -15,8 +15,23 @@ let currentData = null;
 
 // Parse date helper function
 function parseDate(dateStr) {
-    const [month, day, year] = dateStr.split('/');
-    return moment(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
+    if (!dateStr) return moment();
+    try {
+        // Check if date is already in ISO format
+        if (dateStr.includes('-')) {
+            return moment(dateStr);
+        }
+        // Parse MM/DD/YYYY format
+        const [month, day, year] = dateStr.split('/');
+        if (!month || !day || !year) {
+            console.error('Invalid date format:', dateStr);
+            return moment();
+        }
+        return moment(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
+    } catch (error) {
+        console.error('Date parsing error:', error);
+        return moment();
+    }
 }
 
 // Check if user is already authenticated
@@ -110,6 +125,7 @@ async function initDashboard() {
                 </button>
             </div>
         `;
+        toggleLoading(true);
     }
 }
 
@@ -156,22 +172,27 @@ function resizeCharts() {
 function updateDashboard() {
     if (!currentData) return;
     
-    const lastUpdated = parseDate(currentData.clients.data[currentData.clients.data.length - 1].Date);
-    document.getElementById('lastUpdated').textContent = lastUpdated.format('MMMM D, YYYY h:mm A');
+    document.getElementById('lastUpdated').textContent = 
+        moment(currentData.lastUpdated).format('MMMM D, YYYY h:mm A');
     
-    updateClientDashboard(currentData.clients);
-    updateCompetitorDashboard(currentData.competitors);
+    if (currentData.clients) updateClientDashboard(currentData.clients);
+    if (currentData.competitors) updateCompetitorDashboard(currentData.competitors);
 }
+
 function updateClientDashboard(data) {
     if (!data?.performers?.best || !data?.performers?.worst) return;
     
     updatePerformerCard('bestPerformerClient', data.performers.best, data.performanceHistory.bestPerformer);
     updatePerformerCard('worstPerformerClient', data.performers.worst, data.performanceHistory.worstPerformer);
-    updateIndividualScorecards(data);
-    updateClientGrowthChart(data.data);
-    updateClientPerformanceChart(data.performanceHistory);
-    updateGrowthComparisonChart(data.data);
-    updateClientHistoryTable(data);
+    if (data.data && data.data.length > 0) {
+        updateIndividualScorecards(data);
+        updateClientGrowthChart(data.data);
+        updateGrowthComparisonChart(data.data);
+        updateClientHistoryTable(data);
+    }
+    if (data.performanceHistory) {
+        updateClientPerformanceChart(data.performanceHistory);
+    }
 }
 
 function updateCompetitorDashboard(data) {
@@ -179,59 +200,46 @@ function updateCompetitorDashboard(data) {
     
     updatePerformerCard('bestPerformerCompetitor', data.performers.best);
     updatePerformerCard('worstPerformerCompetitor', data.performers.worst);
-    updateCompetitorGrowthChart(data.data);
-    updateCompetitorMarketChart(data.data);
-    updateCompetitorComparisonTable(data);
+    if (data.data && data.data.length > 0) {
+        updateCompetitorGrowthChart(data.data);
+        updateCompetitorMarketChart(data.data);
+        updateCompetitorComparisonTable(data);
+    }
 }
 
-function updateClientGrowthChart(data) {
-    if (!data || !data.length) return;
+function updateIndividualScorecards(data) {
+    if (!data?.data || !data.data.length) return;
     
-    const months = data.map(d => parseDate(d.Date).format('MMM YYYY'));
-    const accounts = Object.keys(data[0]).filter(key => key !== 'Date');
+    const container = document.getElementById('individualScorecardsContainer');
+    const accounts = Object.keys(data.data[0]).filter(key => key !== 'Date');
+    const latestData = data.data[data.data.length - 1];
+    const previousData = data.data[data.data.length - 2];
     
-    const series = accounts.map(account => ({
-        name: account,
-        type: 'line',
-        data: calculateGrowthRates(data, account),
-        smooth: true
-    }));
-
-    const option = {
-        tooltip: {
-            trigger: 'axis',
-            formatter: function(params) {
-                return params.reduce((acc, param) => {
-                    return acc + `${param.seriesName}: ${param.value.toFixed(2)}%<br>`;
-                }, `${params[0].axisValue}<br>`);
-            }
-        },
-        legend: {
-            type: 'scroll',
-            bottom: 0,
-            data: accounts
-        },
-        grid: {
-            left: '3%',
-            right: '4%',
-            bottom: '15%',
-            containLabel: true
-        },
-        xAxis: {
-            type: 'category',
-            data: months
-        },
-        yAxis: {
-            type: 'value',
-            name: 'Growth %',
-            axisLabel: {
-                formatter: '{value}%'
-            }
-        },
-        series: series
-    };
-
-    charts.clientGrowth.setOption(option);
+    container.innerHTML = accounts.map(account => {
+        const currentValue = latestData[account];
+        const previousValue = previousData[account];
+        const growth = ((currentValue - previousValue) / previousValue) * 100;
+        const timesBest = data.performanceHistory.bestPerformer[account] || 0;
+        const timesWorst = data.performanceHistory.worstPerformer[account] || 0;
+        
+        return `
+            <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow">
+                <h4 class="font-bold text-lg mb-2">${account}</h4>
+                <div class="space-y-2">
+                    <p class="text-gray-600">Current Followers: <span class="font-medium">${currentValue.toLocaleString()}</span></p>
+                    <p class="text-gray-600">Growth: 
+                        <span class="${growth >= 0 ? 'text-green-500' : 'text-red-500'}">
+                            ${growth > 0 ? '+' : ''}${growth.toFixed(2)}%
+                        </span>
+                    </p>
+                    <div class="text-sm text-gray-500">
+                        <p>Times Best: ${timesBest}</p>
+                        <p>Times Worst: ${timesWorst}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 function updateGrowthComparisonChart(data) {
@@ -297,6 +305,134 @@ function updateGrowthComparisonChart(data) {
     };
 
     charts.growthComparison.setOption(option);
+}
+
+function updatePerformerCard(elementId, performer, history = null) {
+    const element = document.getElementById(elementId);
+    if (!element || !performer) return;
+    
+    const historyCount = history ? history[performer.account] || 0 : null;
+    
+    element.innerHTML = `
+        <p class="text-2xl font-bold">${performer.account}</p>
+        <p class="text-gray-600">Growth: 
+            <span class="${performer.growth >= 0 ? 'text-green-500' : 'text-red-500'}">
+                ${performer.growth > 0 ? '+' : ''}${performer.growth.toFixed(2)}%
+            </span>
+        </p>
+        ${history !== null ? `
+            <p class="text-sm text-gray-500">
+                ${elementId.includes('best') ? 'Times as best performer: ' : 'Times needing attention: '}
+                ${historyCount}
+            </p>
+        ` : ''}
+        <div class="mt-2 text-sm text-gray-500">
+            <p>Current Followers: <span class="font-medium">${performer.currentFollowers.toLocaleString()}</span></p>
+        </div>
+    `;
+}
+
+function updateClientGrowthChart(data) {
+    if (!data || !data.length) return;
+    
+    const months = data.map(d => parseDate(d.Date).format('MMM YYYY'));
+    const accounts = Object.keys(data[0]).filter(key => key !== 'Date');
+    
+    const series = accounts.map(account => ({
+        name: account,
+        type: 'line',
+        data: calculateGrowthRates(data, account),
+        smooth: true
+    }));
+
+    const option = {
+        tooltip: {
+            trigger: 'axis',
+            formatter: function(params) {
+                return params.reduce((acc, param) => {
+                    return acc + `${param.seriesName}: ${param.value.toFixed(2)}%<br>`;
+                }, `${params[0].axisValue}<br>`);
+            }
+        },
+        legend: {
+            type: 'scroll',
+            bottom: 0,
+            data: accounts
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '15%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'category',
+            data: months
+        },
+        yAxis: {
+            type: 'value',
+            name: 'Growth %',
+            axisLabel: {
+                formatter: '{value}%'
+            }
+        },
+        series: series
+    };
+
+    charts.clientGrowth.setOption(option);
+}
+
+function updateClientPerformanceChart(history) {
+    if (!history) return;
+    
+    const accounts = Object.keys(history.bestPerformer);
+    const bestData = accounts.map(account => history.bestPerformer[account] || 0);
+    const worstData = accounts.map(account => history.worstPerformer[account] || 0);
+
+    const option = {
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' }
+        },
+        legend: {
+            data: ['Best Performance', 'Needs Attention'],
+            bottom: 0
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '15%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'category',
+            data: accounts,
+            axisLabel: {
+                interval: 0,
+                rotate: 45
+            }
+        },
+        yAxis: {
+            type: 'value',
+            name: 'Times'
+        },
+        series: [
+            {
+                name: 'Best Performance',
+                type: 'bar',
+                data: bestData,
+                itemStyle: { color: '#10B981' }
+            },
+            {
+                name: 'Needs Attention',
+                type: 'bar',
+                data: worstData,
+                itemStyle: { color: '#EF4444' }
+            }
+        ]
+    };
+
+    charts.clientPerformance.setOption(option);
 }
 
 function updateCompetitorGrowthChart(data) {
@@ -397,63 +533,6 @@ function calculateGrowthRates(data, account) {
         const previous = data[index - 1][account];
         return ((current[account] - previous) / previous) * 100;
     });
-}
-function updateIndividualScorecards(data) {
-    if (!data?.data || !data.data.length) return;
-    
-    const container = document.getElementById('individualScorecardsContainer');
-    const accounts = Object.keys(data.data[0]).filter(key => key !== 'Date');
-    const latestData = data.data[data.data.length - 1];
-    const previousData = data.data[data.data.length - 2];
-    
-    container.innerHTML = accounts.map(account => {
-        const currentValue = latestData[account];
-        const previousValue = previousData[account];
-        const growth = ((currentValue - previousValue) / previousValue) * 100;
-        const timesBest = data.performanceHistory.bestPerformer[account] || 0;
-        const timesWorst = data.performanceHistory.worstPerformer[account] || 0;
-        
-        return `
-            <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow">
-                <h4 class="font-bold text-lg mb-2">${account}</h4>
-                <div class="space-y-2">
-                    <p class="text-gray-600">Current Followers: <span class="font-medium">${currentValue.toLocaleString()}</span></p>
-                    <p class="text-gray-600">Growth: 
-                        <span class="${growth >= 0 ? 'text-green-500' : 'text-red-500'}">
-                            ${growth > 0 ? '+' : ''}${growth.toFixed(2)}%
-                        </span>
-                    </p>
-                    <div class="text-sm text-gray-500">
-                        <p>Times Best: ${timesBest}</p>
-                        <p>Times Worst: ${timesWorst}</p>
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-function updatePerformerCard(elementId, performer, history = null) {
-    const element = document.getElementById(elementId);
-    const historyCount = history ? history[performer.account] || 0 : null;
-    
-    element.innerHTML = `
-        <p class="text-2xl font-bold">${performer.account}</p>
-        <p class="text-gray-600">Growth: 
-            <span class="${performer.growth >= 0 ? 'text-green-500' : 'text-red-500'}">
-                ${performer.growth > 0 ? '+' : ''}${performer.growth.toFixed(2)}%
-            </span>
-        </p>
-        ${history !== null ? `
-            <p class="text-sm text-gray-500">
-                ${elementId.includes('best') ? 'Times as best performer: ' : 'Times needing attention: '}
-                ${historyCount}
-            </p>
-        ` : ''}
-        <div class="mt-2 text-sm text-gray-500">
-            <p>Current Followers: <span class="font-medium">${performer.currentFollowers.toLocaleString()}</span></p>
-        </div>
-    `;
 }
 
 function updateClientHistoryTable(data) {
