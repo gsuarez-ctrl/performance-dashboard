@@ -271,35 +271,78 @@
     "performers": {
       "best": {
         "account": "lindsaybartonbarrett",
-        "growth": 8.23,
+        "growth": 8.228764478764479,
         "currentFollowers": 4485
       },
       "worst": {
         "account": "StudioCAHS",
-        "growth": -0.27,
+        "growth": -0.2715015415765496,
         "currentFollowers": 21672
       }
     },
     "performanceHistory": {
       "bestPerformer": {
-        "lindsaybartonbarrett": 5,
-        "rottetcollection": 3,
-        "lucreziabuccellati": 3,
-        "lrottet": 2,
-        "reddymadedesign": 1
+        "westwharfbk": 1,
+        "williamsburgwharf": 6,
+        "lucreziabuccellati": 1,
+        "lindsaybartonbarrett": 4,
+        "aspromisedmag": 1
       },
       "worstPerformer": {
+        "caterinahstewart": 2,
         "StudioCAHS": 4,
-        "liveone38": 3,
-        "rottetcollection": 2,
-        "lrottet": 2,
-        "200e20th": 2,
+        "rottetcollection": 1,
+        "liveone38": 4,
+        "lrottet": 1,
         "westwharfbk": 1
       }
     }
   },
   "competitors": {
-    "data": [],
+    "data": [
+      {
+        "Date": "10/28/2024"
+      },
+      {
+        "Date": "10/30/2024"
+      },
+      {
+        "Date": "11/1/2024"
+      },
+      {
+        "Date": "11/4/2024"
+      },
+      {
+        "Date": "11/6/2024"
+      },
+      {
+        "Date": "11/11/2024"
+      },
+      {
+        "Date": "11/13/2024"
+      },
+      {
+        "Date": "11/18/2024"
+      },
+      {
+        "Date": "11/20/2024"
+      },
+      {
+        "Date": "11/25/2024"
+      },
+      {
+        "Date": "11/27/2024"
+      },
+      {
+        "Date": "12/2/2024"
+      },
+      {
+        "Date": "12/4/2024"
+      },
+      {
+        "Date": "12/9/2024"
+      }
+    ],
     "performers": {
       "best": null,
       "worst": null
@@ -309,5 +352,5 @@
       "worstPerformer": {}
     }
   },
-  "lastUpdated": "2024-12-10T00:00:00.000Z"
+  "lastUpdated": "2024-12-11T01:52:03.309Z"
 }
