@@ -8,6 +8,19 @@ let charts = {
 
 let currentData = null;
 
+// Simple debounce function without lodash
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
 // Initialize dashboard
 async function initDashboard() {
     try {
@@ -22,7 +35,7 @@ async function initDashboard() {
         console.log('Data fetched successfully');
         
         currentData = await response.json();
-        console.log('Data parsed successfully:', currentData);
+        console.log('Data parsed:', currentData);
         
         initializeCharts();
         setupEventListeners();
@@ -32,8 +45,8 @@ async function initDashboard() {
     } catch (error) {
         console.error('Dashboard initialization error:', error);
         document.getElementById('loading').innerHTML = `
-            <div class="text-center text-red-500">
-                <p class="mb-4">Error loading dashboard data: ${error.message}</p>
+            <div class="text-center">
+                <p class="text-red-500 mb-4">Error loading dashboard data: ${error.message}</p>
                 <button onclick="initDashboard()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                     Retry
                 </button>
@@ -50,21 +63,14 @@ function toggleLoading(show) {
 function setupEventListeners() {
     document.getElementById('clientsTab').addEventListener('click', () => switchTab('clients'));
     document.getElementById('competitorsTab').addEventListener('click', () => switchTab('competitors'));
-    document.getElementById('refreshBtn').addEventListener('click', () => {
-        console.log('Refreshing data...');
-        initDashboard();
-    });
+    document.getElementById('refreshBtn').addEventListener('click', initDashboard);
     document.getElementById('exportBtn').addEventListener('click', exportData);
     
-    // Handle window resize
-    let resizeTimeout;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
-            console.log('Resizing charts...');
-            resizeCharts();
-        }, 250);
-    });
+    const resizeHandler = debounce(() => {
+        Object.values(charts).forEach(chart => chart?.resize());
+    }, 250);
+    
+    window.addEventListener('resize', resizeHandler);
 }
 
 function switchTab(tab) {
@@ -84,18 +90,11 @@ function initializeCharts() {
 }
 
 function resizeCharts() {
-    for (const chart of Object.values(charts)) {
-        if (chart) {
-            chart.resize();
-        }
-    }
+    Object.values(charts).forEach(chart => chart?.resize());
 }
 
 function updateDashboard() {
-    if (!currentData) {
-        console.error('No data available to update dashboard');
-        return;
-    }
+    if (!currentData) return;
     
     document.getElementById('lastUpdated').textContent = 
         moment(currentData.lastUpdated).format('MMMM D, YYYY h:mm A');
@@ -126,8 +125,6 @@ function updateCompetitorDashboard(data) {
 
 function updatePerformerCard(elementId, performer, history = null) {
     const element = document.getElementById(elementId);
-    if (!element || !performer) return;
-
     const historyCount = history ? history[performer.account] || 0 : null;
     
     element.innerHTML = `
@@ -436,6 +433,6 @@ function exportData() {
 
 // Initialize dashboard when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, initializing dashboard...');
+    console.log('Initializing dashboard...');
     initDashboard();
 });
