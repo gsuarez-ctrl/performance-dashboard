@@ -17,10 +17,12 @@ let currentData = null;
 function checkAuth() {
     const auth = sessionStorage.getItem('dashboardAuth');
     if (auth === 'true') {
+        console.log('Found existing auth');
         isAuthenticated = true;
         hideLoginScreen();
         initDashboard();
     } else {
+        console.log('No existing auth found');
         showLoginScreen();
     }
 }
@@ -38,13 +40,16 @@ function hideLoginScreen() {
 function handleLogin(e) {
     e.preventDefault();
     const password = document.getElementById('password').value;
+    console.log('Login attempt');
     
     if (password === CORRECT_PASSWORD) {
+        console.log('Login successful');
         isAuthenticated = true;
         sessionStorage.setItem('dashboardAuth', 'true');
         hideLoginScreen();
         initDashboard();
     } else {
+        console.log('Login failed - incorrect password');
         document.getElementById('loginError').classList.remove('hidden');
         document.getElementById('password').value = '';
     }
@@ -54,6 +59,7 @@ function handleLogout() {
     isAuthenticated = false;
     sessionStorage.removeItem('dashboardAuth');
     showLoginScreen();
+    console.log('Logged out');
 }
 
 // Simple debounce function
@@ -75,12 +81,13 @@ async function initDashboard() {
         toggleLoading(true);
         console.log('Fetching data...');
         
-        const response = await fetch('/performance-dashboard/data/processed_followers.json');
+        const response = await fetch('./data/processed_followers.json');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         currentData = await response.json();
+        console.log('Data loaded:', currentData);
         
         initializeCharts();
         setupEventListeners();
@@ -284,6 +291,7 @@ function updatePerformerCard(elementId, performer, history = null) {
         </div>
     `;
 }
+
 function updateClientGrowthChart(data) {
     if (!data || !data.length) return;
     
