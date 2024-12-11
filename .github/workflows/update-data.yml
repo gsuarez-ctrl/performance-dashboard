@@ -1,170 +1,53 @@
-const { google } = require('googleapis');
-const fs = require('fs');
-const path = require('path');
+name: Update Dashboard Data
+on:
+  schedule:
+    - cron: "0 12 * * *"
+  workflow_dispatch:
 
-async function fetchSheetData(auth) {
-    const sheets = google.sheets({ version: 'v4', auth });
-    const spreadsheetId = process.env.SHEET_ID;
+permissions:
+  contents: write
 
-    try {
-        // Fetch both client and competitor data
-        const [clientResponse, competitorResponse] = await Promise.all([
-            sheets.spreadsheets.values.get({
-                spreadsheetId,
-                range: 'followers!A:Q',
-            }),
-            sheets.spreadsheets.values.get({
-                spreadsheetId,
-                range: 'competitors!A:H',
-            })
-        ]);
-
-        return {
-            clients: clientResponse.data.values,
-            competitors: competitorResponse.data.values
-        };
-    } catch (error) {
-        console.error('Error fetching data:', error);
-        throw error;
-    }
-}
-
-function processData(rows) {
-    if (!rows || rows.length < 2) return null;
-
-    const headers = rows[0];
-    return rows.slice(1).map(row => {
-        const entry = {};
-        headers.forEach((header, index) => {
-            if (index === 0) {
-                entry[header] = row[index];
-            } else {
-                entry[header] = row[index] ? Number(row[index]) : null;
-            }
-        });
-        return entry;
-    });
-}
-
-function calculatePerformers(data) {
-    if (!data || data.length < 2) {
-        return { best: null, worst: null };
-    }
-
-    const latest = data[data.length - 1];
-    const previous = data[data.length - 2];
-    let bestGrowth = -Infinity;
-    let worstGrowth = Infinity;
-    let bestPerformer = null;
-    let worstPerformer = null;
-
-    Object.keys(latest).forEach(account => {
-        if (account !== 'Date' && latest[account] && previous[account]) {
-            const growth = ((latest[account] - previous[account]) / previous[account]) * 100;
-            
-            if (growth > bestGrowth) {
-                bestGrowth = growth;
-                bestPerformer = {
-                    account,
-                    growth,
-                    currentFollowers: latest[account]
-                };
-            }
-            if (growth < worstGrowth) {
-                worstGrowth = growth;
-                worstPerformer = {
-                    account,
-                    growth,
-                    currentFollowers: latest[account]
-                };
-            }
-        }
-    });
-
-    return { best: bestPerformer, worst: worstPerformer };
-}
-
-function calculatePerformanceHistory(data) {
-    const history = { bestPerformer: {}, worstPerformer: {} };
-    
-    for (let i = 1; i < data.length; i++) {
-        const current = data[i];
-        const previous = data[i - 1];
-        let bestGrowth = -Infinity;
-        let worstGrowth = Infinity;
-        let bestAccount = '';
-        let worstAccount = '';
-
-        Object.keys(current).forEach(account => {
-            if (account !== 'Date' && current[account] && previous[account]) {
-                const growth = ((current[account] - previous[account]) / previous[account]) * 100;
-                
-                if (growth > bestGrowth) {
-                    bestGrowth = growth;
-                    bestAccount = account;
-                }
-                if (growth < worstGrowth) {
-                    worstGrowth = growth;
-                    worstAccount = account;
-                }
-            }
-        });
-
-        if (bestAccount) {
-            history.bestPerformer[bestAccount] = (history.bestPerformer[bestAccount] || 0) + 1;
-        }
-        if (worstAccount) {
-            history.worstPerformer[worstAccount] = (history.worstPerformer[worstAccount] || 0) + 1;
-        }
-    }
-
-    return history;
-}
-
-async function main() {
-    try {
-        // Set up Google Sheets auth
-        const auth = new google.auth.GoogleAuth({
-            credentials: {
-                client_email: process.env.GOOGLE_CLIENT_EMAIL,
-                private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-            },
-            scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
-        });
-
-        // Fetch data from both sheets
-        const sheetData = await fetchSheetData(auth);
-
-        // Process both datasets
-        const clientData = processData(sheetData.clients);
-        const competitorData = processData(sheetData.competitors);
-
-        // Prepare processed data structure
-        const processedData = {
-            clients: {
-                data: clientData,
-                performers: calculatePerformers(clientData),
-                performanceHistory: calculatePerformanceHistory(clientData)
-            },
-            competitors: {
-                data: competitorData,
-                performers: calculatePerformers(competitorData),
-                performanceHistory: calculatePerformanceHistory(competitorData)
-            },
-            lastUpdated: new Date().toISOString()
-        };
-
-        // Write processed data
-        const outputPath = path.join(__dirname, '../data/processed_followers.json');
-        fs.writeFileSync(outputPath, JSON.stringify(processedData, null, 2));
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          
+      - name: Install dependencies
+        run: npm install
         
-        console.log('Data successfully processed');
-        console.log('Output written to:', outputPath);
+      - name: Create directories
+        run: |
+          mkdir -p data
+          mkdir -p docs/data
         
-    } catch (error) {
-        console.error('Error:', error);
-        process.exit(1);
-    }
-}
-
-main();
+      - name: Fetch latest data
+        env:
+          GOOGLE_CLIENT_EMAIL: ${{ secrets.GOOGLE_CLIENT_EMAIL }}
+          GOOGLE_PRIVATE_KEY: ${{ secrets.GOOGLE_PRIVATE_KEY }}
+          SHEET_ID: ${{ secrets.SHEET_ID }}
+        run: |
+          node scripts/fetchData.js
+          cp data/* docs/data/
+        
+      - name: Check for changes
+        id: check_changes
+        run: |
+          git status
+          echo "changes=$(git status --porcelain | wc -l)" >> $GITHUB_OUTPUT
+        
+      - name: Commit and push if changed
+        if: steps.check_changes.outputs.changes > 0
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git add data/* docs/data/*
+          git commit -m "Update dashboard data [skip ci]"
+          git push
