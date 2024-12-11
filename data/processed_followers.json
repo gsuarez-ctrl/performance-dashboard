@@ -2,7 +2,7 @@
   "clients": {
     "data": [
       {
-        "Date": "10/28/2024",
+        "Date": "2024-10-28 23:38:15",
         "reddymadedesign": 17833,
         "rottetcollection": 26910,
         "lrottet": 68495,
@@ -21,7 +21,7 @@
         "aspromisedmag": 4601
       },
       {
-        "Date": "10/30/2024",
+        "Date": "2024-10-30 12:04:57",
         "reddymadedesign": 17892,
         "rottetcollection": 26969,
         "lrottet": 68538,
@@ -40,7 +40,7 @@
         "aspromisedmag": 4601
       },
       {
-        "Date": "11/1/2024",
+        "Date": "2024-11-01 16:08:50",
         "reddymadedesign": 17999,
         "rottetcollection": 27051,
         "lrottet": 68656,
@@ -59,7 +59,7 @@
         "aspromisedmag": 4601
       },
       {
-        "Date": "11/4/2024",
+        "Date": "2024-11-04 9:35:15",
         "reddymadedesign": 18024,
         "rottetcollection": 27111,
         "lrottet": 68799,
@@ -78,7 +78,7 @@
         "aspromisedmag": 4601
       },
       {
-        "Date": "11/6/2024",
+        "Date": "2024-11-06 9:36:56",
         "reddymadedesign": 18071,
         "rottetcollection": 27125,
         "lrottet": 68806,
@@ -97,7 +97,7 @@
         "aspromisedmag": 4601
       },
       {
-        "Date": "11/11/2024",
+        "Date": "2024-11-11 15:45:45",
         "reddymadedesign": 18129,
         "rottetcollection": 27450,
         "lrottet": 69183,
@@ -116,7 +116,7 @@
         "aspromisedmag": 4601
       },
       {
-        "Date": "11/13/2024",
+        "Date": "2024-11-13 9:36:23",
         "reddymadedesign": 18219,
         "rottetcollection": 27388,
         "lrottet": 69271,
@@ -135,7 +135,7 @@
         "aspromisedmag": 4635
       },
       {
-        "Date": "11/18/2024",
+        "Date": "2024-11-18 9:43:13",
         "reddymadedesign": 18253,
         "rottetcollection": 27326,
         "lrottet": 69601,
@@ -154,7 +154,7 @@
         "aspromisedmag": 4711
       },
       {
-        "Date": "11/20/2024",
+        "Date": "2024-11-20 9:38:16",
         "reddymadedesign": 18274,
         "rottetcollection": 27354,
         "lrottet": 69532,
@@ -173,7 +173,7 @@
         "aspromisedmag": 4724
       },
       {
-        "Date": "11/25/2024",
+        "Date": "2024-11-25 21:22:27",
         "reddymadedesign": 18307,
         "rottetcollection": 27427,
         "lrottet": 69839,
@@ -192,7 +192,7 @@
         "aspromisedmag": 4777
       },
       {
-        "Date": "11/27/2024",
+        "Date": "2024-11-27 9:40:23",
         "reddymadedesign": 18314,
         "rottetcollection": 27450,
         "lrottet": 69926,
@@ -211,7 +211,7 @@
         "aspromisedmag": 4775
       },
       {
-        "Date": "12/2/2024",
+        "Date": "2024-12-02 9:42:33",
         "reddymadedesign": 18322,
         "rottetcollection": 27612,
         "lrottet": 70186,
@@ -230,7 +230,7 @@
         "aspromisedmag": 4799
       },
       {
-        "Date": "12/4/2024",
+        "Date": "2024-12-04 9:24:48",
         "reddymadedesign": 18338,
         "rottetcollection": 28302,
         "lrottet": 70414,
@@ -249,7 +249,7 @@
         "aspromisedmag": 4820
       },
       {
-        "Date": "12/9/2024",
+        "Date": "2024-12-09 9:26:04",
         "reddymadedesign": 18380,
         "rottetcollection": 28681,
         "lrottet": 70956,
@@ -266,27 +266,66 @@
         "williamsburgwharf": 1417,
         "westwharfbk": 1732,
         "aspromisedmag": 4851
+      },
+      {
+        "Date": "2024-12-11 1:17:26",
+        "reddymadedesign": 18390,
+        "rottetcollection": 28834,
+        "lrottet": 71040,
+        "rottetstudio": 18683,
+        "StudioCAHS": 21665,
+        "caterinahstewart": 9779,
+        "lucreziabuccellati": 20427,
+        "lindsaybartonbarrett": 4516,
+        "forddrive": 3840,
+        "alfredoparedesstudio": 47292,
+        "bobbyanspachstudiosfoundation": 8416,
+        "liveone38": 2426,
+        "200e20th": 2598,
+        "williamsburgwharf": 1419,
+        "westwharfbk": 1735,
+        "aspromisedmag": 4853
+      },
+      {
+        "Date": "2024-12-11 1:54:05",
+        "reddymadedesign": 18390,
+        "rottetcollection": 28835,
+        "lrottet": 71042,
+        "rottetstudio": 18683,
+        "StudioCAHS": 21665,
+        "caterinahstewart": 9779,
+        "lucreziabuccellati": 20427,
+        "lindsaybartonbarrett": 4517,
+        "forddrive": 3840,
+        "alfredoparedesstudio": 47291,
+        "bobbyanspachstudiosfoundation": 8416,
+        "liveone38": 2426,
+        "200e20th": 2598,
+        "williamsburgwharf": 1419,
+        "westwharfbk": 1736,
+        "aspromisedmag": 4853
       }
     ],
     "performers": {
       "best": {
-        "account": "lindsaybartonbarrett",
-        "growth": 8.228764478764479,
-        "currentFollowers": 4485
+        "account": "westwharfbk",
+        "growth": 0.05763688760806917,
+        "currentFollowers": 1736
       },
       "worst": {
-        "account": "StudioCAHS",
-        "growth": -0.2715015415765496,
-        "currentFollowers": 21672
+        "account": "alfredoparedesstudio",
+        "growth": -0.0021145225408102848,
+        "currentFollowers": 47291
       }
     },
     "performanceHistory": {
       "bestPerformer": {
-        "westwharfbk": 1,
+        "westwharfbk": 2,
         "williamsburgwharf": 6,
         "lucreziabuccellati": 1,
         "lindsaybartonbarrett": 4,
-        "aspromisedmag": 1
+        "aspromisedmag": 1,
+        "forddrive": 1
       },
       "worstPerformer": {
         "caterinahstewart": 2,
@@ -294,63 +333,55 @@
         "rottetcollection": 1,
         "liveone38": 4,
         "lrottet": 1,
-        "westwharfbk": 1
+        "westwharfbk": 1,
+        "200e20th": 1,
+        "alfredoparedesstudio": 1
       }
     }
   },
   "competitors": {
     "data": [
       {
-        "Date": "10/28/2024"
+        "Date": "2024-12-11 1:20:32",
+        "centralparktower": 77387,
+        "waldorfnyc": 46406,
+        "111west57st": 52063,
+        "jdsdevelopmentgroup": 54002,
+        "thebrooklyntower": 8226,
+        "onedominosquare": 4509,
+        "greenpointlanding": 5311
       },
       {
-        "Date": "10/30/2024"
-      },
-      {
-        "Date": "11/1/2024"
-      },
-      {
-        "Date": "11/4/2024"
-      },
-      {
-        "Date": "11/6/2024"
-      },
-      {
-        "Date": "11/11/2024"
-      },
-      {
-        "Date": "11/13/2024"
-      },
-      {
-        "Date": "11/18/2024"
-      },
-      {
-        "Date": "11/20/2024"
-      },
-      {
-        "Date": "11/25/2024"
-      },
-      {
-        "Date": "11/27/2024"
-      },
-      {
-        "Date": "12/2/2024"
-      },
-      {
-        "Date": "12/4/2024"
-      },
-      {
-        "Date": "12/9/2024"
+        "Date": "2024-12-11 1:56:57",
+        "centralparktower": 77387,
+        "waldorfnyc": 46407,
+        "111west57st": 52062,
+        "jdsdevelopmentgroup": 54001,
+        "thebrooklyntower": 8226,
+        "onedominosquare": 4510,
+        "greenpointlanding": 5310
       }
     ],
     "performers": {
-      "best": null,
-      "worst": null
+      "best": {
+        "account": "onedominosquare",
+        "growth": 0.022177866489243733,
+        "currentFollowers": 4510
+      },
+      "worst": {
+        "account": "greenpointlanding",
+        "growth": -0.018828845791752966,
+        "currentFollowers": 5310
+      }
     },
     "performanceHistory": {
-      "bestPerformer": {},
-      "worstPerformer": {}
+      "bestPerformer": {
+        "onedominosquare": 1
+      },
+      "worstPerformer": {
+        "greenpointlanding": 1
+      }
     }
   },
-  "lastUpdated": "2024-12-11T01:57:59.037Z"
+  "lastUpdated": "2024-12-11T18:34:01.950Z"
 }
