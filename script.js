@@ -1,14 +1,62 @@
+// Authentication
+const CORRECT_PASSWORD = 'PalasseDigital';
+let isAuthenticated = false;
+
 // Initialize charts
 let charts = {
     clientGrowth: null,
     clientPerformance: null,
+    growthComparison: null,
     competitorGrowth: null,
     competitorMarket: null
 };
 
 let currentData = null;
 
-// Simple debounce function without lodash
+// Check if user is already authenticated
+function checkAuth() {
+    const auth = sessionStorage.getItem('dashboardAuth');
+    if (auth === 'true') {
+        isAuthenticated = true;
+        hideLoginScreen();
+        initDashboard();
+    } else {
+        showLoginScreen();
+    }
+}
+
+function showLoginScreen() {
+    document.getElementById('loginOverlay').classList.remove('hidden');
+    document.getElementById('dashboardContainer').classList.add('hidden');
+    document.getElementById('loading').classList.add('hidden');
+}
+
+function hideLoginScreen() {
+    document.getElementById('loginOverlay').classList.add('hidden');
+}
+
+function handleLogin(e) {
+    e.preventDefault();
+    const password = document.getElementById('password').value;
+    
+    if (password === CORRECT_PASSWORD) {
+        isAuthenticated = true;
+        sessionStorage.setItem('dashboardAuth', 'true');
+        hideLoginScreen();
+        initDashboard();
+    } else {
+        document.getElementById('loginError').classList.remove('hidden');
+        document.getElementById('password').value = '';
+    }
+}
+
+function handleLogout() {
+    isAuthenticated = false;
+    sessionStorage.removeItem('dashboardAuth');
+    showLoginScreen();
+}
+
+// Simple debounce function
 function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -27,15 +75,12 @@ async function initDashboard() {
         toggleLoading(true);
         console.log('Fetching data...');
         
-        // Using relative path for GitHub Pages
         const response = await fetch('/performance-dashboard/data/processed_followers.json');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        console.log('Data fetched successfully');
         
         currentData = await response.json();
-        console.log('Data parsed:', currentData);
         
         initializeCharts();
         setupEventListeners();
@@ -65,6 +110,7 @@ function setupEventListeners() {
     document.getElementById('competitorsTab').addEventListener('click', () => switchTab('competitors'));
     document.getElementById('refreshBtn').addEventListener('click', initDashboard);
     document.getElementById('exportBtn').addEventListener('click', exportData);
+    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
     
     const resizeHandler = debounce(() => {
         Object.values(charts).forEach(chart => chart?.resize());
@@ -85,6 +131,7 @@ function switchTab(tab) {
 function initializeCharts() {
     charts.clientGrowth = echarts.init(document.getElementById('clientGrowthChart'));
     charts.clientPerformance = echarts.init(document.getElementById('clientPerformanceHistory'));
+    charts.growthComparison = echarts.init(document.getElementById('growthComparisonChart'));
     charts.competitorGrowth = echarts.init(document.getElementById('competitorGrowthChart'));
     charts.competitorMarket = echarts.init(document.getElementById('competitorMarketShare'));
 }
@@ -108,19 +155,111 @@ function updateClientDashboard(data) {
     
     updatePerformerCard('bestPerformerClient', data.performers.best, data.performanceHistory.bestPerformer);
     updatePerformerCard('worstPerformerClient', data.performers.worst, data.performanceHistory.worstPerformer);
+    updateIndividualScorecards(data);
     updateClientGrowthChart(data.data);
     updateClientPerformanceChart(data.performanceHistory);
+    updateGrowthComparisonChart(data.data);
     updateClientHistoryTable(data);
 }
 
-function updateCompetitorDashboard(data) {
-    if (!data?.performers?.best || !data?.performers?.worst) return;
+function updateIndividualScorecards(data) {
+    if (!data?.data || !data.data.length) return;
     
-    updatePerformerCard('bestPerformerCompetitor', data.performers.best);
-    updatePerformerCard('worstPerformerCompetitor', data.performers.worst);
-    updateCompetitorGrowthChart(data.data);
-    updateCompetitorMarketChart(data.data);
-    updateCompetitorComparisonTable(data);
+    const container = document.getElementById('individualScorecardsContainer');
+    const accounts = Object.keys(data.data[0]).filter(key => key !== 'Date');
+    const latestData = data.data[data.data.length - 1];
+    const previousData = data.data[data.data.length - 2];
+    
+    container.innerHTML = accounts.map(account => {
+        const currentValue = latestData[account];
+        const previousValue = previousData[account];
+        const growth = ((currentValue - previousValue) / previousValue) * 100;
+        const timesBest = data.performanceHistory.bestPerformer[account] || 0;
+        const timesWorst = data.performanceHistory.worstPerformer[account] || 0;
+        
+        return `
+            <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow">
+                <h4 class="font-bold text-lg mb-2">${account}</h4>
+                <div class="space-y-2">
+                    <p class="text-gray-600">Current Followers: <span class="font-medium">${currentValue.toLocaleString()}</span></p>
+                    <p class="text-gray-600">Growth: 
+                        <span class="${growth >= 0 ? 'text-green-500' : 'text-red-500'}">
+                            ${growth > 0 ? '+' : ''}${growth.toFixed(2)}%
+                        </span>
+                    </p>
+                    <div class="text-sm text-gray-500">
+                        <p>Times Best: ${timesBest}</p>
+                        <p>Times Worst: ${timesWorst}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function updateGrowthComparisonChart(data) {
+    if (!data || !data.length) return;
+    
+    const months = data.map(d => moment(d.Date).format('MMM YYYY'));
+    const accounts = Object.keys(data[0]).filter(key => key !== 'Date');
+    
+    const series = accounts.map(account => {
+        const values = data.map((entry, index) => {
+            if (index === 0) return 0;
+            const currentValue = entry[account];
+            const previousValue = data[index - 1][account];
+            return ((currentValue - previousValue) / previousValue) * 100;
+        });
+        
+        return {
+            name: account,
+            type: 'line',
+            data: values,
+            smooth: true,
+            symbol: 'circle',
+            symbolSize: 8,
+            emphasis: {
+                focus: 'series'
+            }
+        };
+    });
+
+    const option = {
+        tooltip: {
+            trigger: 'axis',
+            formatter: function(params) {
+                return params.reduce((acc, param) => {
+                    return acc + `${param.seriesName}: ${param.value.toFixed(2)}%<br>`;
+                }, `${params[0].axisValue}<br>`);
+            }
+        },
+        legend: {
+            type: 'scroll',
+            bottom: 0,
+            data: accounts
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '15%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'category',
+            data: months,
+            boundaryGap: false
+        },
+        yAxis: {
+            type: 'value',
+            name: 'Growth %',
+            axisLabel: {
+                formatter: '{value}%'
+            }
+        },
+        series: series
+    };
+
+    charts.growthComparison.setOption(option);
 }
 
 function updatePerformerCard(elementId, performer, history = null) {
@@ -145,7 +284,6 @@ function updatePerformerCard(elementId, performer, history = null) {
         </div>
     `;
 }
-
 function updateClientGrowthChart(data) {
     if (!data || !data.length) return;
     
@@ -433,6 +571,6 @@ function exportData() {
 
 // Initialize dashboard when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Initializing dashboard...');
-    initDashboard();
+    document.getElementById('loginForm').addEventListener('submit', handleLogin);
+    checkAuth();
 });
