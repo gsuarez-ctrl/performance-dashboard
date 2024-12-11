@@ -1,41 +1,66 @@
-// scripts/fetchData.js
 const { google } = require('googleapis');
 const fs = require('fs');
 const path = require('path');
 
-function calculateGrowth(current, previous) {
-    return previous ? ((current - previous) / previous) * 100 : 0;
+async function fetchSheetData(auth) {
+    const sheets = google.sheets({ version: 'v4', auth });
+    const spreadsheetId = process.env.SHEET_ID;
+
+    try {
+        // Fetch both client and competitor data
+        const [clientResponse, competitorResponse] = await Promise.all([
+            sheets.spreadsheets.values.get({
+                spreadsheetId,
+                range: 'followers!A:Q',
+            }),
+            sheets.spreadsheets.values.get({
+                spreadsheetId,
+                range: 'competitors!A:H',
+            })
+        ]);
+
+        return {
+            clients: clientResponse.data.values,
+            competitors: competitorResponse.data.values
+        };
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        throw error;
+    }
 }
 
-function processRawData(data, accounts) {
-    if (!data || data.length < 2) {
-        return {
-            data: [],
-            performers: {
-                best: null,
-                worst: null
-            },
-            performanceHistory: {
-                bestPerformer: {},
-                worstPerformer: {}
+function processData(rows) {
+    if (!rows || rows.length < 2) return null;
+
+    const headers = rows[0];
+    return rows.slice(1).map(row => {
+        const entry = {};
+        headers.forEach((header, index) => {
+            if (index === 0) {
+                entry[header] = row[index];
+            } else {
+                entry[header] = row[index] ? Number(row[index]) : null;
             }
-        };
+        });
+        return entry;
+    });
+}
+
+function calculatePerformers(data) {
+    if (!data || data.length < 2) {
+        return { best: null, worst: null };
     }
 
-    // Get latest and previous entries
     const latest = data[data.length - 1];
     const previous = data[data.length - 2];
-
-    // Initialize best/worst trackers
     let bestGrowth = -Infinity;
     let worstGrowth = Infinity;
     let bestPerformer = null;
     let worstPerformer = null;
 
-    // Calculate current period growth rates
     Object.keys(latest).forEach(account => {
         if (account !== 'Date' && latest[account] && previous[account]) {
-            const growth = calculateGrowth(latest[account], previous[account]);
+            const growth = ((latest[account] - previous[account]) / previous[account]) * 100;
             
             if (growth > bestGrowth) {
                 bestGrowth = growth;
@@ -56,117 +81,90 @@ function processRawData(data, accounts) {
         }
     });
 
-    // Track performance history
-    const performanceHistory = {
-        bestPerformer: {},
-        worstPerformer: {}
-    };
+    return { best: bestPerformer, worst: worstPerformer };
+}
 
-    // Calculate historical performance
+function calculatePerformanceHistory(data) {
+    const history = { bestPerformer: {}, worstPerformer: {} };
+    
     for (let i = 1; i < data.length; i++) {
         const current = data[i];
-        const prev = data[i - 1];
-        let monthBest = { growth: -Infinity };
-        let monthWorst = { growth: Infinity };
+        const previous = data[i - 1];
+        let bestGrowth = -Infinity;
+        let worstGrowth = Infinity;
+        let bestAccount = '';
+        let worstAccount = '';
 
         Object.keys(current).forEach(account => {
-            if (account !== 'Date' && current[account] && prev[account]) {
-                const growth = calculateGrowth(current[account], prev[account]);
+            if (account !== 'Date' && current[account] && previous[account]) {
+                const growth = ((current[account] - previous[account]) / previous[account]) * 100;
                 
-                if (growth > monthBest.growth) {
-                    monthBest = { account, growth };
+                if (growth > bestGrowth) {
+                    bestGrowth = growth;
+                    bestAccount = account;
                 }
-                if (growth < monthWorst.growth) {
-                    monthWorst = { account, growth };
+                if (growth < worstGrowth) {
+                    worstGrowth = growth;
+                    worstAccount = account;
                 }
             }
         });
 
-        if (monthBest.account) {
-            performanceHistory.bestPerformer[monthBest.account] = 
-                (performanceHistory.bestPerformer[monthBest.account] || 0) + 1;
+        if (bestAccount) {
+            history.bestPerformer[bestAccount] = (history.bestPerformer[bestAccount] || 0) + 1;
         }
-        if (monthWorst.account) {
-            performanceHistory.worstPerformer[monthWorst.account] = 
-                (performanceHistory.worstPerformer[monthWorst.account] || 0) + 1;
+        if (worstAccount) {
+            history.worstPerformer[worstAccount] = (history.worstPerformer[worstAccount] || 0) + 1;
         }
     }
 
-    return {
-        data,
-        performers: {
-            best: bestPerformer,
-            worst: worstPerformer
-        },
-        performanceHistory
-    };
+    return history;
 }
 
-async function fetchData() {
+async function main() {
     try {
-        console.log('Starting data processing...');
-        
-        // Read the raw JSON file
-        const rawDataPath = path.join(__dirname, '../data/followers.json');
-        const rawData = JSON.parse(fs.readFileSync(rawDataPath, 'utf8'));
-        
-        // Define account groups
-        const clientAccounts = [
-            "reddymadedesign", "rottetcollection", "lrottet", "rottetstudio",
-            "StudioCAHS", "caterinahstewart", "lucreziabuccellati", 
-            "lindsaybartonbarrett", "forddrive", "alfredoparedesstudio",
-            "bobbyanspachstudiosfoundation", "liveone38", "200e20th",
-            "williamsburgwharf", "westwharfbk", "aspromisedmag"
-        ];
-
-        const competitorAccounts = [
-            "centralparktower", "waldorfnyc", "111west57st",
-            "jdsdevelopmentgroup", "thebrooklyntower", "onedominosquare",
-            "greenpointlanding"
-        ];
-
-        // Split data into client and competitor datasets
-        const clientData = rawData.map(entry => {
-            const clientEntry = { Date: entry.Date };
-            clientAccounts.forEach(account => {
-                if (entry[account] !== undefined) clientEntry[account] = entry[account];
-            });
-            return clientEntry;
+        // Set up Google Sheets auth
+        const auth = new google.auth.GoogleAuth({
+            credentials: {
+                client_email: process.env.GOOGLE_CLIENT_EMAIL,
+                private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+            },
+            scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
         });
 
-        const competitorData = rawData.map(entry => {
-            const competitorEntry = { Date: entry.Date };
-            competitorAccounts.forEach(account => {
-                if (entry[account] !== undefined) competitorEntry[account] = entry[account];
-            });
-            return competitorEntry;
-        });
+        // Fetch data from both sheets
+        const sheetData = await fetchSheetData(auth);
 
         // Process both datasets
+        const clientData = processData(sheetData.clients);
+        const competitorData = processData(sheetData.competitors);
+
+        // Prepare processed data structure
         const processedData = {
-            clients: processRawData(clientData, clientAccounts),
-            competitors: processRawData(competitorData, competitorAccounts),
+            clients: {
+                data: clientData,
+                performers: calculatePerformers(clientData),
+                performanceHistory: calculatePerformanceHistory(clientData)
+            },
+            competitors: {
+                data: competitorData,
+                performers: calculatePerformers(competitorData),
+                performanceHistory: calculatePerformanceHistory(competitorData)
+            },
             lastUpdated: new Date().toISOString()
         };
 
-        // Ensure data directory exists
-        const dataDir = path.join(__dirname, '../data');
-        if (!fs.existsSync(dataDir)) {
-            fs.mkdirSync(dataDir, { recursive: true });
-        }
-
         // Write processed data
-        const outputPath = path.join(dataDir, 'processed_followers.json');
+        const outputPath = path.join(__dirname, '../data/processed_followers.json');
         fs.writeFileSync(outputPath, JSON.stringify(processedData, null, 2));
         
         console.log('Data successfully processed');
         console.log('Output written to:', outputPath);
         
     } catch (error) {
-        console.error('Error processing data:', error);
+        console.error('Error:', error);
         process.exit(1);
     }
 }
 
-// Execute the script
-fetchData();
+main();
