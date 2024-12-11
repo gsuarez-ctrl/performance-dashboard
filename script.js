@@ -12,8 +12,8 @@ let currentData = null;
 async function initDashboard() {
     try {
         toggleLoading(true);
-        // Updated fetch path for GitHub Pages
-        const response = await fetch('/instagram-tracker/data/followers.json');
+        // Fetch processed data
+        const response = await fetch('/instagram-tracker/data/processed_followers.json');
         currentData = await response.json();
         
         initializeCharts();
@@ -77,6 +77,8 @@ function updateDashboard() {
 }
 
 function updateClientDashboard(data) {
+    if (!data?.performers?.best || !data?.performers?.worst) return;
+    
     updatePerformerCard('bestPerformerClient', data.performers.best, data.performanceHistory.bestPerformer);
     updatePerformerCard('worstPerformerClient', data.performers.worst, data.performanceHistory.worstPerformer);
     updateClientGrowthChart(data.data);
@@ -85,6 +87,8 @@ function updateClientDashboard(data) {
 }
 
 function updateCompetitorDashboard(data) {
+    if (!data?.performers?.best || !data?.performers?.worst) return;
+    
     updatePerformerCard('bestPerformerCompetitor', data.performers.best);
     updatePerformerCard('worstPerformerCompetitor', data.performers.worst);
     updateCompetitorGrowthChart(data.data);
@@ -116,6 +120,8 @@ function updatePerformerCard(elementId, performer, history = null) {
 }
 
 function updateClientGrowthChart(data) {
+    if (!data || !data.length) return;
+    
     const months = data.map(d => moment(d.Date).format('MMM YYYY'));
     const accounts = Object.keys(data[0]).filter(key => key !== 'Date');
     
@@ -164,6 +170,8 @@ function updateClientGrowthChart(data) {
 }
 
 function updateClientPerformanceChart(history) {
+    if (!history) return;
+    
     const accounts = Object.keys(history.bestPerformer);
     const bestData = accounts.map(account => history.bestPerformer[account] || 0);
     const worstData = accounts.map(account => history.worstPerformer[account] || 0);
@@ -215,6 +223,8 @@ function updateClientPerformanceChart(history) {
 }
 
 function updateCompetitorGrowthChart(data) {
+    if (!data || !data.length) return;
+    
     const months = data.map(d => moment(d.Date).format('MMM YYYY'));
     const competitors = Object.keys(data[0]).filter(key => key !== 'Date');
     
@@ -254,6 +264,8 @@ function updateCompetitorGrowthChart(data) {
 }
 
 function updateCompetitorMarketChart(data) {
+    if (!data || !data.length) return;
+    
     const months = data.map(d => moment(d.Date).format('MMM YYYY'));
     const competitors = Object.keys(data[0]).filter(key => key !== 'Date');
     
@@ -311,6 +323,8 @@ function calculateGrowthRates(data, account) {
 }
 
 function updateClientHistoryTable(data) {
+    if (!data?.data || !data.data.length) return;
+    
     const tableBody = document.querySelector('#clientHistoryTable tbody');
     const accounts = Object.keys(data.data[0]).filter(key => key !== 'Date');
     
@@ -333,6 +347,8 @@ function updateClientHistoryTable(data) {
 }
 
 function updateCompetitorComparisonTable(data) {
+    if (!data?.data || !data.data.length) return;
+    
     const tableBody = document.querySelector('#competitorComparisonTable tbody');
     const latestData = data.data[data.data.length - 1];
     const competitors = Object.keys(latestData).filter(key => key !== 'Date');
