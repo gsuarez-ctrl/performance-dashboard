@@ -3,200 +3,170 @@ const { google } = require('googleapis');
 const fs = require('fs');
 const path = require('path');
 
-// Helper function to calculate month-over-month growth
-function calculateGrowth(currentValue, previousValue) {
-    if (!previousValue || previousValue === 0) return 0;
-    return ((currentValue - previousValue) / previousValue) * 100;
+function calculateGrowth(current, previous) {
+    return previous ? ((current - previous) / previous) * 100 : 0;
 }
 
-// Helper function to identify best and worst performers
-function identifyPerformers(data) {
-    const latestDate = data[data.length - 1].Date;
-    const previousDate = data[data.length - 2]?.Date;
-    
-    if (!previousDate) return { best: null, worst: null, growthRates: {} };
+function processRawData(data, accounts) {
+    if (!data || data.length < 2) {
+        return {
+            data: [],
+            performers: {
+                best: null,
+                worst: null
+            },
+            performanceHistory: {
+                bestPerformer: {},
+                worstPerformer: {}
+            }
+        };
+    }
 
+    // Get latest and previous entries
     const latest = data[data.length - 1];
     const previous = data[data.length - 2];
+
+    // Initialize best/worst trackers
     let bestGrowth = -Infinity;
     let worstGrowth = Infinity;
-    let bestAccount = '';
-    let worstAccount = '';
-    const growthRates = {};
+    let bestPerformer = null;
+    let worstPerformer = null;
 
-    // Calculate growth rates for all accounts
-    Object.keys(latest).forEach(key => {
-        if (key !== 'Date' && latest[key] && previous[key]) {
-            const growth = calculateGrowth(latest[key], previous[key]);
-            growthRates[key] = growth;
-
+    // Calculate current period growth rates
+    Object.keys(latest).forEach(account => {
+        if (account !== 'Date' && latest[account] && previous[account]) {
+            const growth = calculateGrowth(latest[account], previous[account]);
+            
             if (growth > bestGrowth) {
                 bestGrowth = growth;
-                bestAccount = key;
+                bestPerformer = {
+                    account,
+                    growth,
+                    currentFollowers: latest[account]
+                };
             }
             if (growth < worstGrowth) {
                 worstGrowth = growth;
-                worstAccount = key;
+                worstPerformer = {
+                    account,
+                    growth,
+                    currentFollowers: latest[account]
+                };
             }
         }
     });
 
-    return {
-        best: {
-            account: bestAccount,
-            growth: bestGrowth,
-            currentFollowers: latest[bestAccount]
-        },
-        worst: {
-            account: worstAccount,
-            growth: worstGrowth,
-            currentFollowers: latest[worstAccount]
-        },
-        growthRates
-    };
-}
-
-// Helper function to track performance history
-function trackPerformanceHistory(data) {
-    const history = {
+    // Track performance history
+    const performanceHistory = {
         bestPerformer: {},
         worstPerformer: {}
     };
 
-    // Analyze each month's data
+    // Calculate historical performance
     for (let i = 1; i < data.length; i++) {
         const current = data[i];
-        const previous = data[i - 1];
-        const monthKey = new Date(current.Date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
-        
-        let bestGrowth = -Infinity;
-        let worstGrowth = Infinity;
-        let bestAccount = '';
-        let worstAccount = '';
+        const prev = data[i - 1];
+        let monthBest = { growth: -Infinity };
+        let monthWorst = { growth: Infinity };
 
-        Object.keys(current).forEach(key => {
-            if (key !== 'Date' && current[key] && previous[key]) {
-                const growth = calculateGrowth(current[key], previous[key]);
+        Object.keys(current).forEach(account => {
+            if (account !== 'Date' && current[account] && prev[account]) {
+                const growth = calculateGrowth(current[account], prev[account]);
                 
-                if (growth > bestGrowth) {
-                    bestGrowth = growth;
-                    bestAccount = key;
+                if (growth > monthBest.growth) {
+                    monthBest = { account, growth };
                 }
-                if (growth < worstGrowth) {
-                    worstGrowth = growth;
-                    worstAccount = key;
+                if (growth < monthWorst.growth) {
+                    monthWorst = { account, growth };
                 }
             }
         });
 
-        // Record monthly performance
-        if (bestAccount) {
-            history.bestPerformer[bestAccount] = (history.bestPerformer[bestAccount] || 0) + 1;
+        if (monthBest.account) {
+            performanceHistory.bestPerformer[monthBest.account] = 
+                (performanceHistory.bestPerformer[monthBest.account] || 0) + 1;
         }
-        if (worstAccount) {
-            history.worstPerformer[worstAccount] = (history.worstPerformer[worstAccount] || 0) + 1;
+        if (monthWorst.account) {
+            performanceHistory.worstPerformer[monthWorst.account] = 
+                (performanceHistory.worstPerformer[monthWorst.account] || 0) + 1;
         }
     }
-
-    return history;
-}
-
-async function fetchSheetData(sheets, spreadsheetId, range) {
-    try {
-        const response = await sheets.spreadsheets.values.get({
-            spreadsheetId,
-            range,
-        });
-        
-        return response.data.values;
-    } catch (error) {
-        console.error(`Error fetching ${range}:`, error);
-        throw error;
-    }
-}
-
-async function processData(rows, sheetName) {
-    if (!rows || rows.length === 0) {
-        throw new Error(`No data found in ${sheetName} sheet`);
-    }
-
-    const headers = rows[0];
-    const data = rows.slice(1).map(row => {
-        const entry = {};
-        headers.forEach((header, index) => {
-            if (index === 0) {
-                // Convert date string to more readable format
-                entry[header] = new Date(row[index]).toLocaleDateString();
-            } else {
-                entry[header] = row[index] ? Number(row[index]) : null;
-            }
-        });
-        return entry;
-    });
-
-    // Calculate performance metrics
-    const performers = identifyPerformers(data);
-    const performanceHistory = trackPerformanceHistory(data);
 
     return {
         data,
-        performers,
+        performers: {
+            best: bestPerformer,
+            worst: worstPerformer
+        },
         performanceHistory
     };
 }
 
 async function fetchData() {
     try {
-        console.log('Starting data fetch...');
+        console.log('Starting data processing...');
         
-        // Configure Google Sheets API
-        const auth = new google.auth.GoogleAuth({
-            credentials: {
-                client_email: process.env.GOOGLE_CLIENT_EMAIL,
-                private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-            },
-            scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+        // Read the raw JSON file
+        const rawDataPath = path.join(__dirname, '../data/followers.json');
+        const rawData = JSON.parse(fs.readFileSync(rawDataPath, 'utf8'));
+        
+        // Define account groups
+        const clientAccounts = [
+            "reddymadedesign", "rottetcollection", "lrottet", "rottetstudio",
+            "StudioCAHS", "caterinahstewart", "lucreziabuccellati", 
+            "lindsaybartonbarrett", "forddrive", "alfredoparedesstudio",
+            "bobbyanspachstudiosfoundation", "liveone38", "200e20th",
+            "williamsburgwharf", "westwharfbk", "aspromisedmag"
+        ];
+
+        const competitorAccounts = [
+            "centralparktower", "waldorfnyc", "111west57st",
+            "jdsdevelopmentgroup", "thebrooklyntower", "onedominosquare",
+            "greenpointlanding"
+        ];
+
+        // Split data into client and competitor datasets
+        const clientData = rawData.map(entry => {
+            const clientEntry = { Date: entry.Date };
+            clientAccounts.forEach(account => {
+                if (entry[account] !== undefined) clientEntry[account] = entry[account];
+            });
+            return clientEntry;
         });
 
-        const sheets = google.sheets({ version: 'v4', auth });
-        const spreadsheetId = process.env.SHEET_ID;
-        
-        // Fetch data from both sheets
-        console.log('Fetching data from sheets...');
-        const clientRows = await fetchSheetData(sheets, spreadsheetId, 'clients!A:Z');
-        const competitorRows = await fetchSheetData(sheets, spreadsheetId, 'competitors!A:Z');
+        const competitorData = rawData.map(entry => {
+            const competitorEntry = { Date: entry.Date };
+            competitorAccounts.forEach(account => {
+                if (entry[account] !== undefined) competitorEntry[account] = entry[account];
+            });
+            return competitorEntry;
+        });
 
         // Process both datasets
-        const clientData = await processData(clientRows, 'clients');
-        const competitorData = await processData(competitorRows, 'competitors');
-
-        // Combine data into a single structure
-        const combinedData = {
-            clients: clientData,
-            competitors: competitorData,
+        const processedData = {
+            clients: processRawData(clientData, clientAccounts),
+            competitors: processRawData(competitorData, competitorAccounts),
             lastUpdated: new Date().toISOString()
         };
 
-        // Create data directory if it doesn't exist
+        // Ensure data directory exists
         const dataDir = path.join(__dirname, '../data');
         if (!fs.existsSync(dataDir)) {
             fs.mkdirSync(dataDir, { recursive: true });
         }
 
-        // Write to data file
-        const outputPath = path.join(dataDir, 'followers.json');
-        fs.writeFileSync(outputPath, JSON.stringify(combinedData, null, 2));
+        // Write processed data
+        const outputPath = path.join(dataDir, 'processed_followers.json');
+        fs.writeFileSync(outputPath, JSON.stringify(processedData, null, 2));
         
-        console.log('Data successfully written to:', outputPath);
-        console.log('Sample of processed data:', {
-            clientSample: clientData.data[0],
-            competitorSample: competitorData.data[0]
-        });
+        console.log('Data successfully processed');
+        console.log('Output written to:', outputPath);
         
     } catch (error) {
-        console.error('Error in fetchData:', error);
+        console.error('Error processing data:', error);
         process.exit(1);
     }
 }
 
+// Execute the script
 fetchData();
