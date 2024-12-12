@@ -8,7 +8,8 @@ let charts = {
     clientPerformance: null,
     growthComparison: null,
     competitorGrowth: null,
-    competitorMarket: null
+    competitorMarket: null,
+    monthlyComparison: null
 };
 
 let currentData = null;
@@ -24,7 +25,6 @@ function parseDate(dateStr) {
     }
 }
 
-// Check if user is already authenticated
 function checkAuth() {
     const auth = sessionStorage.getItem('dashboardAuth');
     if (auth === 'true') {
@@ -73,7 +73,6 @@ function handleLogout() {
     console.log('Logged out');
 }
 
-// Simple debounce function
 function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -86,7 +85,6 @@ function debounce(func, wait) {
     };
 }
 
-// Initialize dashboard
 async function initDashboard() {
     try {
         toggleLoading(true);
@@ -123,6 +121,7 @@ function toggleLoading(show) {
     document.getElementById('loading').classList.toggle('hidden', !show);
     document.getElementById('dashboardContainer').classList.toggle('hidden', show);
 }
+
 function setupEventListeners() {
     document.getElementById('clientsTab').addEventListener('click', () => switchTab('clients'));
     document.getElementById('competitorsTab').addEventListener('click', () => switchTab('competitors'));
@@ -152,6 +151,7 @@ function initializeCharts() {
     charts.growthComparison = echarts.init(document.getElementById('growthComparisonChart'));
     charts.competitorGrowth = echarts.init(document.getElementById('competitorGrowthChart'));
     charts.competitorMarket = echarts.init(document.getElementById('competitorMarketShare'));
+    charts.monthlyComparison = echarts.init(document.getElementById('monthlyComparisonChart'));
 }
 
 function resizeCharts() {
@@ -180,6 +180,8 @@ function updateClientDashboard(data) {
         updateClientGrowthChart(data.data);
         updateGrowthComparisonChart(data.data);
         updateClientHistoryTable(data);
+        updateMonthlyComparison(data);
+        updateMonthlySummary(data);
     }
     if (data.performanceHistory) {
         updateClientPerformanceChart(data.performanceHistory);
@@ -196,6 +198,115 @@ function updateCompetitorDashboard(data) {
         updateCompetitorMarketChart(data.data);
         updateCompetitorComparisonTable(data);
     }
+}
+
+function updateMonthlySummary(data) {
+    if (!data?.data || data.data.length < 2) return;
+    
+    const lastTwoMonths = data.data.slice(-2);
+    const accounts = Object.keys(lastTwoMonths[0]).filter(key => key !== 'Date');
+    
+    // Calculate growth for all accounts
+    const growthData = accounts.map(account => {
+        const currentValue = lastTwoMonths[1][account];
+        const previousValue = lastTwoMonths[0][account];
+        const growth = ((currentValue - previousValue) / previousValue) * 100;
+        return { account, growth, currentValue, previousValue };
+    });
+
+    // Sort by growth
+    growthData.sort((a, b) => b.growth - a.growth);
+
+    // Most improved account
+    const mostImproved = growthData[0];
+    document.getElementById('mostImproved').innerHTML = `
+        <p class="font-medium">${mostImproved.account}</p>
+        <p class="text-green-500">+${mostImproved.growth.toFixed(2)}%</p>
+        <p class="text-sm text-gray-500">${mostImproved.currentValue.toLocaleString()} followers</p>
+    `;
+
+    // Account needing focus
+    const needsFocus = growthData[growthData.length - 1];
+    document.getElementById('needsFocus').innerHTML = `
+        <p class="font-medium">${needsFocus.account}</p>
+        <p class="text-red-500">${needsFocus.growth.toFixed(2)}%</p>
+        <p class="text-sm text-gray-500">${needsFocus.currentValue.toLocaleString()} followers</p>
+    `;
+
+    // Overall growth
+    const totalPrevious = growthData.reduce((sum, item) => sum + item.previousValue, 0);
+    const totalCurrent = growthData.reduce((sum, item) => sum + item.currentValue, 0);
+    const overallGrowth = ((totalCurrent - totalPrevious) / totalPrevious) * 100;
+    
+    document.getElementById('overallGrowth').innerHTML = `
+        <p class="font-medium">All Accounts</p>
+        <p class="${overallGrowth >= 0 ? 'text-green-500' : 'text-red-500'}">
+            ${overallGrowth > 0 ? '+' : ''}${overallGrowth.toFixed(2)}%
+        </p>
+        <p class="text-sm text-gray-500">
+            ${totalCurrent.toLocaleString()} total followers
+        </p>
+    `;
+}
+
+function updateMonthlyComparison(data) {
+    if (!data?.data || data.data.length < 2) return;
+    
+    const accounts = Object.keys(data.data[0]).filter(key => key !== 'Date');
+    const lastTwoMonths = data.data.slice(-2);
+    
+    const growthData = accounts.map(account => {
+        const currentValue = lastTwoMonths[1][account];
+        const previousValue = lastTwoMonths[0][account];
+        const growth = ((currentValue - previousValue) / previousValue) * 100;
+        return { account, growth };
+    });
+
+    // Sort by growth for better visualization
+    growthData.sort((a, b) => b.growth - a.growth);
+
+    const option = {
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'shadow'
+            },
+            formatter: params => `${params[0].name}<br/>Growth: ${params[0].value.toFixed(2)}%`
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '15%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'category',
+            data: growthData.map(d => d.account),
+            axisLabel: {
+                interval: 0,
+                rotate: 45
+            }
+        },
+        yAxis: {
+            type: 'value',
+            name: 'Growth %',
+            axisLabel: {
+                formatter: '{value}%'
+            }
+        },
+        series: [{
+            type: 'bar',
+            data: growthData.map(d => d.growth),
+            itemStyle: {
+                color: params => {
+                    const value = params.value;
+                    return value >= 0 ? '#10B981' : '#EF4444';
+                }
+            }
+        }]
+    };
+
+    charts.monthlyComparison.setOption(option);
 }
 
 function updateIndividualScorecards(data) {
@@ -232,6 +343,7 @@ function updateIndividualScorecards(data) {
         `;
     }).join('');
 }
+
 function updateGrowthComparisonChart(data) {
     if (!data || !data.length) return;
     
@@ -424,6 +536,7 @@ function updateClientPerformanceChart(history) {
 
     charts.clientPerformance.setOption(option);
 }
+
 function updateCompetitorGrowthChart(data) {
     if (!data || !data.length) return;
     
