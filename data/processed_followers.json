@@ -2,6 +2,25 @@
   "clients": {
     "data": [
       {
+        "Date": "10/1/2024 16:00:00",
+        "reddymadedesign": 17723,
+        "rottetcollection": 26145,
+        "lrottet": 67418,
+        "rottetstudio": 17986,
+        "StudioCAHS": 21852,
+        "caterinahstewart": null,
+        "lucreziabuccellati": 18415,
+        "lindsaybartonbarrett": 3411,
+        "forddrive": 3561,
+        "alfredoparedesstudio": 46401,
+        "bobbyanspachstudiosfoundation": 8339,
+        "liveone38": 2291,
+        "200e20th": 2418,
+        "williamsburgwharf": 1101,
+        "westwharfbk": 1606,
+        "aspromisedmag": 4601
+      },
+      {
         "Date": "2024-11-01 16:08:50",
         "reddymadedesign": 17999,
         "rottetcollection": 27051,
@@ -54,9 +73,10 @@
     },
     "performanceHistory": {
       "bestPerformer": {
-        "williamsburgwharf": 1
+        "williamsburgwharf": 2
       },
       "worstPerformer": {
+        "StudioCAHS": 1,
         "liveone38": 1
       }
     }
@@ -105,5 +125,5 @@
       }
     }
   },
-  "lastUpdated": "2024-12-12T12:35:37.465Z"
+  "lastUpdated": "2024-12-12T13:41:22.780Z"
 }
