@@ -17,17 +17,7 @@ let currentData = null;
 function parseDate(dateStr) {
     if (!dateStr) return moment();
     try {
-        // Check if date is already in ISO format
-        if (dateStr.includes('-')) {
-            return moment(dateStr);
-        }
-        // Parse MM/DD/YYYY format
-        const [month, day, year] = dateStr.split('/');
-        if (!month || !day || !year) {
-            console.error('Invalid date format:', dateStr);
-            return moment();
-        }
-        return moment(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
+        return moment(dateStr);
     } catch (error) {
         console.error('Date parsing error:', error);
         return moment();
@@ -133,7 +123,6 @@ function toggleLoading(show) {
     document.getElementById('loading').classList.toggle('hidden', !show);
     document.getElementById('dashboardContainer').classList.toggle('hidden', show);
 }
-
 function setupEventListeners() {
     document.getElementById('clientsTab').addEventListener('click', () => switchTab('clients'));
     document.getElementById('competitorsTab').addEventListener('click', () => switchTab('competitors'));
@@ -171,12 +160,14 @@ function resizeCharts() {
 
 function updateDashboard() {
     if (!currentData) return;
+
+    // Update last updated time
+    const lastUpdatedTime = moment(currentData.lastUpdated).format('MMMM D, YYYY h:mm A');
+    document.getElementById('lastUpdated').textContent = lastUpdatedTime;
     
-    document.getElementById('lastUpdated').textContent = 
-        moment(currentData.lastUpdated).format('MMMM D, YYYY h:mm A');
-    
-    if (currentData.clients) updateClientDashboard(currentData.clients);
-    if (currentData.competitors) updateCompetitorDashboard(currentData.competitors);
+    // Update dashboards if data exists
+    if (currentData.clients?.data) updateClientDashboard(currentData.clients);
+    if (currentData.competitors?.data) updateCompetitorDashboard(currentData.competitors);
 }
 
 function updateClientDashboard(data) {
@@ -241,11 +232,10 @@ function updateIndividualScorecards(data) {
         `;
     }).join('');
 }
-
 function updateGrowthComparisonChart(data) {
     if (!data || !data.length) return;
     
-    const months = data.map(d => parseDate(d.Date).format('MMM YYYY'));
+    const months = data.map(d => moment(d.Date).format('MMM YYYY'));
     const accounts = Object.keys(data[0]).filter(key => key !== 'Date');
     
     const series = accounts.map(account => {
@@ -335,7 +325,7 @@ function updatePerformerCard(elementId, performer, history = null) {
 function updateClientGrowthChart(data) {
     if (!data || !data.length) return;
     
-    const months = data.map(d => parseDate(d.Date).format('MMM YYYY'));
+    const months = data.map(d => moment(d.Date).format('MMM YYYY'));
     const accounts = Object.keys(data[0]).filter(key => key !== 'Date');
     
     const series = accounts.map(account => ({
@@ -434,11 +424,10 @@ function updateClientPerformanceChart(history) {
 
     charts.clientPerformance.setOption(option);
 }
-
 function updateCompetitorGrowthChart(data) {
     if (!data || !data.length) return;
     
-    const months = data.map(d => parseDate(d.Date).format('MMM YYYY'));
+    const months = data.map(d => moment(d.Date).format('MMM YYYY'));
     const competitors = Object.keys(data[0]).filter(key => key !== 'Date');
     
     const series = competitors.map(competitor => ({
@@ -479,7 +468,7 @@ function updateCompetitorGrowthChart(data) {
 function updateCompetitorMarketChart(data) {
     if (!data || !data.length) return;
     
-    const months = data.map(d => parseDate(d.Date).format('MMM YYYY'));
+    const months = data.map(d => moment(d.Date).format('MMM YYYY'));
     const competitors = Object.keys(data[0]).filter(key => key !== 'Date');
     
     const series = competitors.map(competitor => ({
