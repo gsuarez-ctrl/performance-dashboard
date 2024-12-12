@@ -25,6 +25,83 @@ function parseDate(dateStr) {
     }
 }
 
+function setupMonthToMonthComparison(data) {
+    if (!data?.data || data.data.length < 2) return;
+
+    const accountSelect = document.getElementById('accountSelect');
+    const monthSelect1 = document.getElementById('monthSelect1');
+    const monthSelect2 = document.getElementById('monthSelect2');
+
+    // Get accounts and dates
+    const accounts = Object.keys(data.data[0]).filter(key => key !== 'Date');
+    const dates = data.data.map(d => ({
+        value: d.Date,
+        label: moment(d.Date).format('MMMM YYYY')
+    }));
+
+    // Populate account dropdown
+    accountSelect.innerHTML = accounts.map(account => 
+        `<option value="${account}">${account}</option>`
+    ).join('');
+
+    // Populate month dropdowns
+    const monthOptions = dates.map(date => 
+        `<option value="${date.value}">${date.label}</option>`
+    ).join('');
+    monthSelect1.innerHTML = monthOptions;
+    monthSelect2.innerHTML = monthOptions;
+
+    // Set default selections
+    monthSelect2.selectedIndex = dates.length - 1;  // Latest month
+    monthSelect1.selectedIndex = dates.length - 2;  // Previous month
+
+    // Add event listeners
+    const updateComparison = () => {
+        const account = accountSelect.value;
+        const month1Data = data.data.find(d => d.Date === monthSelect1.value);
+        const month2Data = data.data.find(d => d.Date === monthSelect2.value);
+
+        if (month1Data && month2Data) {
+            const followers1 = month1Data[account];
+            const followers2 = month2Data[account];
+            const difference = followers2 - followers1;
+            const growth = ((followers2 - followers1) / followers1) * 100;
+
+            document.getElementById('monthComparisonResult').innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="p-4 bg-white rounded-lg shadow">
+                        <h4 class="text-sm font-medium text-gray-500">${moment(monthSelect1.value).format('MMMM YYYY')}</h4>
+                        <p class="text-xl font-bold mt-1">${followers1.toLocaleString()}</p>
+                    </div>
+                    <div class="p-4 bg-white rounded-lg shadow">
+                        <h4 class="text-sm font-medium text-gray-500">${moment(monthSelect2.value).format('MMMM YYYY')}</h4>
+                        <p class="text-xl font-bold mt-1">${followers2.toLocaleString()}</p>
+                    </div>
+                    <div class="p-4 bg-white rounded-lg shadow">
+                        <h4 class="text-sm font-medium text-gray-500">Follower Change</h4>
+                        <p class="text-xl font-bold mt-1 ${difference >= 0 ? 'text-green-500' : 'text-red-500'}">
+                            ${difference >= 0 ? '+' : ''}${difference.toLocaleString()}
+                        </p>
+                    </div>
+                    <div class="p-4 bg-white rounded-lg shadow">
+                        <h4 class="text-sm font-medium text-gray-500">Growth Rate</h4>
+                        <p class="text-xl font-bold mt-1 ${growth >= 0 ? 'text-green-500' : 'text-red-500'}">
+                            ${growth >= 0 ? '+' : ''}${growth.toFixed(2)}%
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+    };
+
+    accountSelect.addEventListener('change', updateComparison);
+    monthSelect1.addEventListener('change', updateComparison);
+    monthSelect2.addEventListener('change', updateComparison);
+
+    // Initial comparison
+    updateComparison();
+}
+
 function checkAuth() {
     const auth = sessionStorage.getItem('dashboardAuth');
     if (auth === 'true') {
@@ -166,7 +243,10 @@ function updateDashboard() {
     document.getElementById('lastUpdated').textContent = lastUpdatedTime;
     
     // Update dashboards if data exists
-    if (currentData.clients?.data) updateClientDashboard(currentData.clients);
+    if (currentData.clients?.data) {
+        updateClientDashboard(currentData.clients);
+        setupMonthToMonthComparison(currentData.clients);
+    }
     if (currentData.competitors?.data) updateCompetitorDashboard(currentData.competitors);
 }
 
@@ -188,16 +268,46 @@ function updateClientDashboard(data) {
     }
 }
 
-function updateCompetitorDashboard(data) {
-    if (!data?.performers?.best || !data?.performers?.worst) return;
+function updateIndividualScorecards(data) {
+    if (!data?.data || !data.data.length) return;
     
-    updatePerformerCard('bestPerformerCompetitor', data.performers.best);
-    updatePerformerCard('worstPerformerCompetitor', data.performers.worst);
-    if (data.data && data.data.length > 0) {
-        updateCompetitorGrowthChart(data.data);
-        updateCompetitorMarketChart(data.data);
-        updateCompetitorComparisonTable(data);
-    }
+    const container = document.getElementById('individualScorecardsContainer');
+    const accounts = Object.keys(data.data[0]).filter(key => key !== 'Date');
+    const latestData = data.data[data.data.length - 1];
+    const previousData = data.data[data.data.length - 2];
+    
+    container.innerHTML = accounts.map(account => {
+        const currentValue = latestData[account];
+        const previousValue = previousData[account];
+        const followerDifference = currentValue - previousValue;
+        const growth = ((currentValue - previousValue) / previousValue) * 100;
+        const timesBest = data.performanceHistory.bestPerformer[account] || 0;
+        const timesWorst = data.performanceHistory.worstPerformer[account] || 0;
+        
+        return `
+            <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow">
+                <h4 class="font-bold text-lg mb-2">${account}</h4>
+                <div class="space-y-2">
+                    <p class="text-gray-600">Current Followers: <span class="font-medium">${currentValue.toLocaleString()}</span></p>
+                    <p class="text-gray-600">Previous Month: <span class="font-medium">${previousValue.toLocaleString()}</span></p>
+                    <p class="text-gray-600">Follower Growth: 
+                        <span class="${followerDifference >= 0 ? 'text-green-500' : 'text-red-500'} font-medium">
+                            ${followerDifference >= 0 ? '+' : ''}${followerDifference.toLocaleString()} followers
+                        </span>
+                    </p>
+                    <p class="text-gray-600">Growth Rate: 
+                        <span class="${growth >= 0 ? 'text-green-500' : 'text-red-500'}">
+                            ${growth > 0 ? '+' : ''}${growth.toFixed(2)}%
+                        </span>
+                    </p>
+                    <div class="text-sm text-gray-500 pt-2 border-t border-gray-200 mt-2">
+                        <p>Times Best: ${timesBest}</p>
+                        <p>Times Worst: ${timesWorst}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 function updateMonthlySummary(data) {
@@ -247,6 +357,18 @@ function updateMonthlySummary(data) {
             ${totalCurrent.toLocaleString()} total followers
         </p>
     `;
+}
+
+function updateCompetitorDashboard(data) {
+    if (!data?.performers?.best || !data?.performers?.worst) return;
+    
+    updatePerformerCard('bestPerformerCompetitor', data.performers.best);
+    updatePerformerCard('worstPerformerCompetitor', data.performers.worst);
+    if (data.data && data.data.length > 0) {
+        updateCompetitorGrowthChart(data.data);
+        updateCompetitorMarketChart(data.data);
+        updateCompetitorComparisonTable(data);
+    }
 }
 
 function updateMonthlyComparison(data) {
@@ -307,41 +429,6 @@ function updateMonthlyComparison(data) {
     };
 
     charts.monthlyComparison.setOption(option);
-}
-
-function updateIndividualScorecards(data) {
-    if (!data?.data || !data.data.length) return;
-    
-    const container = document.getElementById('individualScorecardsContainer');
-    const accounts = Object.keys(data.data[0]).filter(key => key !== 'Date');
-    const latestData = data.data[data.data.length - 1];
-    const previousData = data.data[data.data.length - 2];
-    
-    container.innerHTML = accounts.map(account => {
-        const currentValue = latestData[account];
-        const previousValue = previousData[account];
-        const growth = ((currentValue - previousValue) / previousValue) * 100;
-        const timesBest = data.performanceHistory.bestPerformer[account] || 0;
-        const timesWorst = data.performanceHistory.worstPerformer[account] || 0;
-        
-        return `
-            <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow">
-                <h4 class="font-bold text-lg mb-2">${account}</h4>
-                <div class="space-y-2">
-                    <p class="text-gray-600">Current Followers: <span class="font-medium">${currentValue.toLocaleString()}</span></p>
-                    <p class="text-gray-600">Growth: 
-                        <span class="${growth >= 0 ? 'text-green-500' : 'text-red-500'}">
-                            ${growth > 0 ? '+' : ''}${growth.toFixed(2)}%
-                        </span>
-                    </p>
-                    <div class="text-sm text-gray-500">
-                        <p>Times Best: ${timesBest}</p>
-                        <p>Times Worst: ${timesWorst}</p>
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
 }
 
 function updateGrowthComparisonChart(data) {
