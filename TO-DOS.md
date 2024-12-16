@@ -1,4 +1,4 @@
-- data fetching on monday - instagram tracker
+- data fetching on monday - instagram tracker -- DONE
 - month to month comparison in the clients tab, in a new tab
 - best performer and worst performer on the top, should say the exact date the snapshot was taken.
 - Growth Comparison, Performance History OUT
