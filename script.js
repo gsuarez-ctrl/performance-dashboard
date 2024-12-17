@@ -15,7 +15,7 @@ let currentData = null;
 function parseDate(dateStr) {
     if (!dateStr) return moment();
     try {
-        return moment(dateStr);
+        return moment(dateStr, 'M/D/YYYY');
     } catch (error) {
         console.error('Date parsing error:', error);
         return moment();
@@ -59,7 +59,7 @@ function setupMonthToMonthComparison(data) {
         const month1Data = monthlyData.find(d => d.Date === monthSelect1.value);
         const month2Data = monthlyData.find(d => d.Date === monthSelect2.value);
 
-        if (month1Data && month2Data) {
+        if (month1Data && month2Data && month1Data[account] && month2Data[account]) {
             const followers1 = month1Data[account];
             const followers2 = month2Data[account];
             const difference = followers2 - followers1;
@@ -109,7 +109,7 @@ function setupWeekToWeekComparison(data) {
     const accounts = Object.keys(data[0]).filter(key => key !== 'Date');
     const dates = data.map(d => ({
         value: d.Date,
-        label: moment(d.Date).format('MMM D, YYYY')
+        label: moment(d.Date, 'M/D/YYYY').format('MMM D, YYYY')
     }));
 
     weeklyAccountSelect.innerHTML = accounts.map(account => 
@@ -130,7 +130,7 @@ function setupWeekToWeekComparison(data) {
         const week1Data = data.find(d => d.Date === weekSelect1.value);
         const week2Data = data.find(d => d.Date === weekSelect2.value);
 
-        if (week1Data && week2Data) {
+        if (week1Data && week2Data && week1Data[account] && week2Data[account]) {
             const followers1 = week1Data[account];
             const followers2 = week2Data[account];
             const difference = followers2 - followers1;
@@ -139,11 +139,11 @@ function setupWeekToWeekComparison(data) {
             document.getElementById('weekComparisonResult').innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="p-4 bg-white rounded-lg shadow">
-                        <h4 class="text-sm font-medium text-gray-500">${moment(weekSelect1.value).format('MMM D, YYYY')}</h4>
+                        <h4 class="text-sm font-medium text-gray-500">${moment(weekSelect1.value, 'M/D/YYYY').format('MMM D, YYYY')}</h4>
                         <p class="text-xl font-bold mt-1">${followers1.toLocaleString()}</p>
                     </div>
                     <div class="p-4 bg-white rounded-lg shadow">
-                        <h4 class="text-sm font-medium text-gray-500">${moment(weekSelect2.value).format('MMM D, YYYY')}</h4>
+                        <h4 class="text-sm font-medium text-gray-500">${moment(weekSelect2.value, 'M/D/YYYY').format('MMM D, YYYY')}</h4>
                         <p class="text-xl font-bold mt-1">${followers2.toLocaleString()}</p>
                     </div>
                     <div class="p-4 bg-white rounded-lg shadow">
@@ -174,7 +174,7 @@ function aggregateMonthlyData(data) {
     const monthlyData = {};
     
     data.forEach(entry => {
-        const monthKey = moment(entry.Date).format('YYYY-MM-01');
+        const monthKey = moment(entry.Date, 'M/D/YYYY').format('YYYY-MM-01');
         if (!monthlyData[monthKey]) {
             monthlyData[monthKey] = { Date: monthKey };
             Object.keys(entry).forEach(key => {
@@ -332,7 +332,7 @@ function resizeCharts() {
 function updateDashboard() {
     if (!currentData) return;
 
-    const lastUpdatedTime = moment(currentData.lastUpdated).format('MMMM D, YYYY h:mm A');
+    const lastUpdatedTime = moment().format('MMMM D, YYYY h:mm A');
     document.getElementById('lastUpdated').textContent = lastUpdatedTime;
     
     if (currentData.clients?.data) {
@@ -515,7 +515,7 @@ function updateMonthlyComparison(data) {
 function updateClientGrowthChart(data) {
     if (!data || !data.length) return;
     
-    const months = data.map(d => moment(d.Date).format('MMM D, YYYY'));
+    const months = data.map(d => moment(d.Date, 'M/D/YYYY').format('MMM D, YYYY'));
     const accounts = Object.keys(data[0]).filter(key => key !== 'Date');
     
     const series = accounts.map(account => ({
@@ -565,7 +565,7 @@ function updateClientGrowthChart(data) {
 function updateCompetitorGrowthChart(data) {
     if (!data || !data.length) return;
     
-    const months = data.map(d => moment(d.Date).format('MMM D, YYYY'));
+    const months = data.map(d => moment(d.Date, 'M/D/YYYY').format('MMM D, YYYY'));
     const competitors = Object.keys(data[0]).filter(key => key !== 'Date');
     
     const series = competitors.map(competitor => ({
