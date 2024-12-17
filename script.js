@@ -23,15 +23,15 @@ function parseDate(dateStr) {
 }
 
 function setupMonthToMonthComparison(data) {
-    if (!data?.data || data.data.length < 2) return;
+    if (!data || data.length < 2) return;
 
     const accountSelect = document.getElementById('accountSelect');
     const monthSelect1 = document.getElementById('monthSelect1');
     const monthSelect2 = document.getElementById('monthSelect2');
 
     // Get accounts and dates
-    const accounts = Object.keys(data.data[0]).filter(key => key !== 'Date');
-    const monthlyData = aggregateMonthlyData(data.data);
+    const accounts = Object.keys(data[0]).filter(key => key !== 'Date');
+    const monthlyData = aggregateMonthlyData(data);
     const dates = monthlyData.map(d => ({
         value: d.Date,
         label: moment(d.Date).format('MMMM YYYY')
@@ -100,14 +100,14 @@ function setupMonthToMonthComparison(data) {
 }
 
 function setupWeekToWeekComparison(data) {
-    if (!data?.data || data.data.length < 2) return;
+    if (!data || data.length < 2) return;
 
     const weeklyAccountSelect = document.getElementById('weeklyAccountSelect');
     const weekSelect1 = document.getElementById('weekSelect1');
     const weekSelect2 = document.getElementById('weekSelect2');
 
-    const accounts = Object.keys(data.data[0]).filter(key => key !== 'Date');
-    const dates = data.data.map(d => ({
+    const accounts = Object.keys(data[0]).filter(key => key !== 'Date');
+    const dates = data.map(d => ({
         value: d.Date,
         label: moment(d.Date).format('MMM D, YYYY')
     }));
@@ -127,8 +127,8 @@ function setupWeekToWeekComparison(data) {
 
     const updateWeekComparison = () => {
         const account = weeklyAccountSelect.value;
-        const week1Data = data.data.find(d => d.Date === weekSelect1.value);
-        const week2Data = data.data.find(d => d.Date === weekSelect2.value);
+        const week1Data = data.find(d => d.Date === weekSelect1.value);
+        const week2Data = data.find(d => d.Date === weekSelect2.value);
 
         if (week1Data && week2Data) {
             const followers1 = week1Data[account];
@@ -324,8 +324,8 @@ function updateDashboard() {
     
     if (currentData.clients?.data) {
         updateClientDashboard(currentData.clients);
-        setupMonthToMonthComparison(currentData.clients);
-        setupWeekToWeekComparison(currentData.clients);
+        setupMonthToMonthComparison(currentData.clients.data);
+        setupWeekToWeekComparison(currentData.clients.data);
     }
     if (currentData.competitors?.data) updateCompetitorDashboard(currentData.competitors);
 }
