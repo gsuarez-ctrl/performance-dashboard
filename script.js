@@ -1,22 +1,19 @@
-// Authentication
+// Global variables
 const CORRECT_PASSWORD = 'PalasseDigital';
 let isAuthenticated = false;
 let currentData = null;
-
-// Initialize charts
 let charts = {
     competitorGrowth: null
 };
 
-function parseDate(dateStr) {
-    if (!dateStr) return moment();
-    try {
-        return moment(dateStr);
-    } catch (error) {
-        console.error('Date parsing error:', error);
-        return moment();
+// Main initialization
+document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
     }
-}
+    checkAuth();
+});
 
 function checkAuth() {
     const auth = sessionStorage.getItem('dashboardAuth');
@@ -30,13 +27,20 @@ function checkAuth() {
 }
 
 function showLoginScreen() {
-    document.getElementById('loginOverlay').classList.remove('hidden');
-    document.getElementById('dashboardContainer').classList.add('hidden');
-    document.getElementById('loading').classList.add('hidden');
+    const loginOverlay = document.getElementById('loginOverlay');
+    const dashboardContainer = document.getElementById('dashboardContainer');
+    const loading = document.getElementById('loading');
+    
+    if (loginOverlay) loginOverlay.classList.remove('hidden');
+    if (dashboardContainer) dashboardContainer.classList.add('hidden');
+    if (loading) loading.classList.add('hidden');
 }
 
 function hideLoginScreen() {
-    document.getElementById('loginOverlay').classList.add('hidden');
+    const loginOverlay = document.getElementById('loginOverlay');
+    if (loginOverlay) {
+        loginOverlay.classList.add('hidden');
+    }
 }
 
 function handleLogin(e) {
@@ -49,8 +53,10 @@ function handleLogin(e) {
         hideLoginScreen();
         initDashboard();
     } else {
-        document.getElementById('loginError').classList.remove('hidden');
-        document.getElementById('password').value = '';
+        const loginError = document.getElementById('loginError');
+        if (loginError) loginError.classList.remove('hidden');
+        const passwordInput = document.getElementById('password');
+        if (passwordInput) passwordInput.value = '';
     }
 }
 
@@ -89,33 +95,48 @@ async function initDashboard() {
         
         toggleLoading(false);
     } catch (error) {
-        console.error('Dashboard initialization error:', error);
-        document.getElementById('loading').innerHTML = `
-            <div class="text-center">
-                <p class="text-red-500 mb-4">Error loading dashboard data: ${error.message}</p>
-                <button onclick="initDashboard()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                    Retry
-                </button>
-            </div>
-        `;
+        const loading = document.getElementById('loading');
+        if (loading) {
+            loading.innerHTML = `
+                <div class="text-center">
+                    <p class="text-red-500 mb-4">Error loading dashboard data: ${error.message}</p>
+                    <button onclick="initDashboard()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                        Retry
+                    </button>
+                </div>
+            `;
+        }
         toggleLoading(true);
     }
 }
 
 function toggleLoading(show) {
-    document.getElementById('loading').classList.toggle('hidden', !show);
-    document.getElementById('dashboardContainer').classList.toggle('hidden', show);
+    const loading = document.getElementById('loading');
+    const dashboardContainer = document.getElementById('dashboardContainer');
+    
+    if (loading) loading.classList.toggle('hidden', !show);
+    if (dashboardContainer) dashboardContainer.classList.toggle('hidden', show);
 }
 
 function setupEventListeners() {
-    document.getElementById('clientsTab')?.addEventListener('click', () => switchTab('clients'));
-    document.getElementById('monthComparisonTab')?.addEventListener('click', () => switchTab('monthComparison'));
-    document.getElementById('weeklyTab')?.addEventListener('click', () => switchTab('weekly'));
-    document.getElementById('competitorsTab')?.addEventListener('click', () => switchTab('competitors'));
-    document.getElementById('refreshBtn')?.addEventListener('click', initDashboard);
-    document.getElementById('exportBtn')?.addEventListener('click', exportData);
-    document.getElementById('logoutBtn')?.addEventListener('click', handleLogout);
-    
+    const elements = {
+        clientsTab: document.getElementById('clientsTab'),
+        monthComparisonTab: document.getElementById('monthComparisonTab'),
+        weeklyTab: document.getElementById('weeklyTab'),
+        competitorsTab: document.getElementById('competitorsTab'),
+        refreshBtn: document.getElementById('refreshBtn'),
+        exportBtn: document.getElementById('exportBtn'),
+        logoutBtn: document.getElementById('logoutBtn')
+    };
+
+    if (elements.clientsTab) elements.clientsTab.addEventListener('click', () => switchTab('clients'));
+    if (elements.monthComparisonTab) elements.monthComparisonTab.addEventListener('click', () => switchTab('monthComparison'));
+    if (elements.weeklyTab) elements.weeklyTab.addEventListener('click', () => switchTab('weekly'));
+    if (elements.competitorsTab) elements.competitorsTab.addEventListener('click', () => switchTab('competitors'));
+    if (elements.refreshBtn) elements.refreshBtn.addEventListener('click', initDashboard);
+    if (elements.exportBtn) elements.exportBtn.addEventListener('click', exportData);
+    if (elements.logoutBtn) elements.logoutBtn.addEventListener('click', handleLogout);
+
     const resizeHandler = debounce(() => {
         Object.values(charts).forEach(chart => chart?.resize());
     }, 250);
@@ -124,42 +145,36 @@ function setupEventListeners() {
 }
 
 function switchTab(tab) {
+    const views = {
+        clients: document.getElementById('clientsView'),
+        monthComparison: document.getElementById('monthComparisonView'),
+        weekly: document.getElementById('weeklyView'),
+        competitors: document.getElementById('competitorsView')
+    };
+
     // Hide all views
-    document.getElementById('clientsView')?.classList.add('hidden');
-    document.getElementById('monthComparisonView')?.classList.add('hidden');
-    document.getElementById('weeklyView')?.classList.add('hidden');
-    document.getElementById('competitorsView')?.classList.add('hidden');
+    Object.values(views).forEach(view => {
+        if (view) view.classList.add('hidden');
+    });
 
     // Remove active class from all tabs
     document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('tab-active'));
 
     // Show selected view and activate tab
-    switch(tab) {
-        case 'clients':
-            document.getElementById('clientsView')?.classList.remove('hidden');
-            document.getElementById('clientsTab')?.classList.add('tab-active');
-            break;
-        case 'monthComparison':
-            document.getElementById('monthComparisonView')?.classList.remove('hidden');
-            document.getElementById('monthComparisonTab')?.classList.add('tab-active');
-            break;
-        case 'weekly':
-            document.getElementById('weeklyView')?.classList.remove('hidden');
-            document.getElementById('weeklyTab')?.classList.add('tab-active');
-            break;
-        case 'competitors':
-            document.getElementById('competitorsView')?.classList.remove('hidden');
-            document.getElementById('competitorsTab')?.classList.add('tab-active');
-            break;
-    }
+    const tabElement = document.getElementById(`${tab}Tab`);
+    const viewElement = views[tab];
+
+    if (tabElement) tabElement.classList.add('tab-active');
+    if (viewElement) viewElement.classList.remove('hidden');
 
     // Resize charts if necessary
     Object.values(charts).forEach(chart => chart?.resize());
 }
 
 function initializeCharts() {
-    if (document.getElementById('competitorGrowthChart')) {
-        charts.competitorGrowth = echarts.init(document.getElementById('competitorGrowthChart'));
+    const competitorGrowthChart = document.getElementById('competitorGrowthChart');
+    if (competitorGrowthChart) {
+        charts.competitorGrowth = echarts.init(competitorGrowthChart);
     }
 }
 
@@ -377,7 +392,7 @@ function updateMonthToMonthComparison(data) {
                     <div class="p-4 bg-white rounded-lg shadow">
                         <h4 class="text-sm font-medium text-gray-500">${moment(monthSelect1.value).format('MMMM YYYY')}</h4>
                         <p class="text-xl font-bold mt-1">${followers1.toLocaleString()}</p>
-                        </div>
+                    </div>
                     <div class="p-4 bg-white rounded-lg shadow">
                         <h4 class="text-sm font-medium text-gray-500">${moment(monthSelect2.value).format('MMMM YYYY')}</h4>
                         <p class="text-xl font-bold mt-1">${followers2.toLocaleString()}</p>
@@ -559,19 +574,4 @@ function exportData() {
     a.click();
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
-}
-
-// Initialize app when DOM is ready
-function initializeApp() {
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', handleLogin);
-    }
-    checkAuth();
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeApp);
-} else {
-    initializeApp();
 }
