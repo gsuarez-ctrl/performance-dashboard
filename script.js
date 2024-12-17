@@ -8,21 +8,23 @@ let charts = {
     competitorGrowth: null
 };
 
-// Initialize dashboard when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('loginForm').addEventListener('submit', handleLogin);
-    checkAuth();
-});
+function parseDate(dateStr) {
+    if (!dateStr) return moment();
+    try {
+        return moment(dateStr);
+    } catch (error) {
+        console.error('Date parsing error:', error);
+        return moment();
+    }
+}
 
 function checkAuth() {
     const auth = sessionStorage.getItem('dashboardAuth');
     if (auth === 'true') {
-        console.log('Found existing auth');
         isAuthenticated = true;
         hideLoginScreen();
         initDashboard();
     } else {
-        console.log('No existing auth found');
         showLoginScreen();
     }
 }
@@ -56,6 +58,18 @@ function handleLogout() {
     isAuthenticated = false;
     sessionStorage.removeItem('dashboardAuth');
     showLoginScreen();
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
 }
 
 async function initDashboard() {
@@ -94,25 +108,27 @@ function toggleLoading(show) {
 }
 
 function setupEventListeners() {
-    document.getElementById('clientsTab').addEventListener('click', () => switchTab('clients'));
-    document.getElementById('monthComparisonTab').addEventListener('click', () => switchTab('monthComparison'));
-    document.getElementById('weeklyTab').addEventListener('click', () => switchTab('weekly'));
-    document.getElementById('competitorsTab').addEventListener('click', () => switchTab('competitors'));
-    document.getElementById('refreshBtn').addEventListener('click', initDashboard);
-    document.getElementById('exportBtn').addEventListener('click', exportData);
-    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+    document.getElementById('clientsTab')?.addEventListener('click', () => switchTab('clients'));
+    document.getElementById('monthComparisonTab')?.addEventListener('click', () => switchTab('monthComparison'));
+    document.getElementById('weeklyTab')?.addEventListener('click', () => switchTab('weekly'));
+    document.getElementById('competitorsTab')?.addEventListener('click', () => switchTab('competitors'));
+    document.getElementById('refreshBtn')?.addEventListener('click', initDashboard);
+    document.getElementById('exportBtn')?.addEventListener('click', exportData);
+    document.getElementById('logoutBtn')?.addEventListener('click', handleLogout);
     
-    window.addEventListener('resize', debounce(() => {
+    const resizeHandler = debounce(() => {
         Object.values(charts).forEach(chart => chart?.resize());
-    }, 250));
+    }, 250);
+    
+    window.addEventListener('resize', resizeHandler);
 }
 
 function switchTab(tab) {
     // Hide all views
-    document.getElementById('clientsView').classList.add('hidden');
-    document.getElementById('monthComparisonView').classList.add('hidden');
-    document.getElementById('weeklyView').classList.add('hidden');
-    document.getElementById('competitorsView').classList.add('hidden');
+    document.getElementById('clientsView')?.classList.add('hidden');
+    document.getElementById('monthComparisonView')?.classList.add('hidden');
+    document.getElementById('weeklyView')?.classList.add('hidden');
+    document.getElementById('competitorsView')?.classList.add('hidden');
 
     // Remove active class from all tabs
     document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('tab-active'));
@@ -120,20 +136,20 @@ function switchTab(tab) {
     // Show selected view and activate tab
     switch(tab) {
         case 'clients':
-            document.getElementById('clientsView').classList.remove('hidden');
-            document.getElementById('clientsTab').classList.add('tab-active');
+            document.getElementById('clientsView')?.classList.remove('hidden');
+            document.getElementById('clientsTab')?.classList.add('tab-active');
             break;
         case 'monthComparison':
-            document.getElementById('monthComparisonView').classList.remove('hidden');
-            document.getElementById('monthComparisonTab').classList.add('tab-active');
+            document.getElementById('monthComparisonView')?.classList.remove('hidden');
+            document.getElementById('monthComparisonTab')?.classList.add('tab-active');
             break;
         case 'weekly':
-            document.getElementById('weeklyView').classList.remove('hidden');
-            document.getElementById('weeklyTab').classList.add('tab-active');
+            document.getElementById('weeklyView')?.classList.remove('hidden');
+            document.getElementById('weeklyTab')?.classList.add('tab-active');
             break;
         case 'competitors':
-            document.getElementById('competitorsView').classList.remove('hidden');
-            document.getElementById('competitorsTab').classList.add('tab-active');
+            document.getElementById('competitorsView')?.classList.remove('hidden');
+            document.getElementById('competitorsTab')?.classList.add('tab-active');
             break;
     }
 
@@ -142,14 +158,19 @@ function switchTab(tab) {
 }
 
 function initializeCharts() {
-    charts.competitorGrowth = echarts.init(document.getElementById('competitorGrowthChart'));
+    if (document.getElementById('competitorGrowthChart')) {
+        charts.competitorGrowth = echarts.init(document.getElementById('competitorGrowthChart'));
+    }
 }
 
 function updateDashboard() {
     if (!currentData) return;
 
     const lastUpdatedTime = moment(currentData.lastUpdated).format('MMMM D, YYYY h:mm A');
-    document.getElementById('lastUpdated').textContent = lastUpdatedTime;
+    const lastUpdatedElement = document.getElementById('lastUpdated');
+    if (lastUpdatedElement) {
+        lastUpdatedElement.textContent = lastUpdatedTime;
+    }
     
     if (currentData.clients?.data) {
         updateClientDashboard(currentData.clients);
@@ -201,6 +222,8 @@ function updateClientDashboard(data) {
 
 function updateHistoricalPerformanceTable(data) {
     const table = document.getElementById('historicalPerformanceTable');
+    if (!table) return;
+
     const accounts = Object.keys(data.data[0]).filter(key => key !== 'Date');
     
     // Create headers for each month
@@ -214,33 +237,42 @@ function updateHistoricalPerformanceTable(data) {
         `).join('')}
         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Growth</th>
     `;
-    table.querySelector('thead').innerHTML = '';
-    table.querySelector('thead').appendChild(headerRow);
+    const thead = table.querySelector('thead');
+    if (thead) {
+        thead.innerHTML = '';
+        thead.appendChild(headerRow);
+    }
 
     // Create rows for each account
     const tbody = table.querySelector('tbody');
-    tbody.innerHTML = accounts.map(account => {
-        const monthlyData = data.data.map(entry => entry[account]);
-        const monthlyGrowth = monthlyData.map((followers, index) => 
-            index === 0 ? 0 : followers - monthlyData[index - 1]
-        ).slice(1);
-        const avgGrowth = Math.round(monthlyGrowth.reduce((a, b) => a + b, 0) / monthlyGrowth.length);
-        
-        return `
-            <tr>
-                <td class="px-6 py-4 whitespace-nowrap font-medium">${account}</td>
-                ${monthlyData.map(followers => `
-                    <td class="px-6 py-4 whitespace-nowrap">${followers.toLocaleString()}</td>
-                `).join('')}
-                <td class="px-6 py-4 whitespace-nowrap">${avgGrowth >= 0 ? '+' : ''}${avgGrowth.toLocaleString()}</td>
-            </tr>
-        `;
-    }).join('');
+    if (tbody) {
+        tbody.innerHTML = accounts.map(account => {
+            const monthlyData = data.data.map(entry => entry[account]);
+            const monthlyGrowth = monthlyData.map((followers, index) => 
+                index === 0 ? 0 : followers - monthlyData[index - 1]
+            ).slice(1);
+            const avgGrowth = Math.round(monthlyGrowth.reduce((a, b) => a + b, 0) / monthlyGrowth.length);
+            
+            return `
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap font-medium">${account}</td>
+                    ${monthlyData.map(followers => `
+                        <td class="px-6 py-4 whitespace-nowrap">${followers.toLocaleString()}</td>
+                    `).join('')}
+                    <td class="px-6 py-4 whitespace-nowrap">${avgGrowth >= 0 ? '+' : ''}${avgGrowth.toLocaleString()}</td>
+                </tr>
+            `;
+        }).join('');
+    }
 }
 
 function updateWeeklyPerformance(data) {
     const table = document.getElementById('weeklyPerformanceTable');
+    if (!table) return;
+
     const tbody = table.querySelector('tbody');
+    if (!tbody) return;
+
     const accounts = Object.keys(data.data[0]).filter(key => key !== 'Date');
     
     // Process data for weekly view
@@ -303,6 +335,8 @@ function updateMonthToMonthComparison(data) {
     const monthSelect1 = document.getElementById('monthSelect1');
     const monthSelect2 = document.getElementById('monthSelect2');
 
+    if (!accountSelect || !monthSelect1 || !monthSelect2) return;
+
     // Get accounts and dates
     const accounts = Object.keys(data.data[0]).filter(key => key !== 'Date');
     const dates = data.data.map(d => ({
@@ -331,18 +365,19 @@ function updateMonthToMonthComparison(data) {
         const account = accountSelect.value;
         const month1Data = data.data.find(d => d.Date === monthSelect1.value);
         const month2Data = data.data.find(d => d.Date === monthSelect2.value);
+        const comparisonResult = document.getElementById('monthComparisonResult');
 
-        if (month1Data && month2Data) {
+        if (month1Data && month2Data && comparisonResult) {
             const followers1 = month1Data[account];
             const followers2 = month2Data[account];
             const difference = followers2 - followers1;
 
-            document.getElementById('monthComparisonResult').innerHTML = `
+            comparisonResult.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="p-4 bg-white rounded-lg shadow">
                         <h4 class="text-sm font-medium text-gray-500">${moment(monthSelect1.value).format('MMMM YYYY')}</h4>
                         <p class="text-xl font-bold mt-1">${followers1.toLocaleString()}</p>
-                    </div>
+                        </div>
                     <div class="p-4 bg-white rounded-lg shadow">
                         <h4 class="text-sm font-medium text-gray-500">${moment(monthSelect2.value).format('MMMM YYYY')}</h4>
                         <p class="text-xl font-bold mt-1">${followers2.toLocaleString()}</p>
@@ -352,7 +387,7 @@ function updateMonthToMonthComparison(data) {
                         <p class="text-xl font-bold mt-1 ${difference >= 0 ? 'text-green-500' : 'text-red-500'}">
                             ${difference >= 0 ? '+' : ''}${difference.toLocaleString()}
                         </p>
-                        </div>
+                    </div>
                 </div>
             `;
         }
@@ -422,7 +457,7 @@ function updateCompetitorCard(elementId, competitor) {
 }
 
 function updateCompetitorGrowthChart(data) {
-    if (!data?.data || !data.data.length) return;
+    if (!data?.data || !data.data.length || !charts.competitorGrowth) return;
     
     const months = data.data.map(d => moment(d.Date).format('MMM YYYY'));
     const competitors = Object.keys(data.data[0]).filter(key => key !== 'Date');
@@ -486,6 +521,8 @@ function updateCompetitorComparisonTable(data) {
     if (!data?.data || !data.data.length) return;
     
     const tableBody = document.querySelector('#competitorComparisonTable tbody');
+    if (!tableBody) return;
+
     const latestData = data.data[data.data.length - 1];
     const previousData = data.data[data.data.length - 2];
     const competitors = Object.keys(latestData).filter(key => key !== 'Date');
@@ -524,14 +561,17 @@ function exportData() {
     document.body.removeChild(a);
 }
 
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
+// Initialize app when DOM is ready
+function initializeApp() {
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+    }
+    checkAuth();
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+    initializeApp();
 }
