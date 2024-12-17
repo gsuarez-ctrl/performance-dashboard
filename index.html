@@ -1,318 +1,339 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Social Media Analytics Dashboard">
-    <meta name="author" content="Instagram Follower Tracker">
-    <title>Social Media Analytics Dashboard</title>
-    
-    <!-- Stylesheets -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <style>
-        .tab-active {
-            border-bottom: 2px solid #4A90E2;
-            color: #4A90E2;
-        }
-        .performance-card {
-            transition: transform 0.3s ease;
-        }
-        .performance-card:hover {
-            transform: translateY(-5px);
-        }
-        .chart-container {
-            min-height: 400px;
-        }
-        #loading {
-            background-color: rgba(255, 255, 255, 0.9);
-        }
-        .growth-positive {
-            color: #10B981;
-        }
-        .growth-negative {
-            color: #EF4444;
-        }
-        .nav-tab {
-            cursor: pointer;
-            padding: 0.5rem 1rem;
-            transition: all 0.3s ease;
-        }
-        .nav-tab:hover {
-            background-color: #F3F4F6;
-        }
-        select {
-            padding: 0.5rem;
-            border-radius: 0.375rem;
-            border: 1px solid #D1D5DB;
-            width: 100%;
-            max-width: 20rem;
-        }
-    </style>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta name="description" content="Social Media Analytics Dashboard">
+   <meta name="author" content="Instagram Follower Tracker">
+   <title>Social Media Analytics Dashboard</title>
+   
+   <!-- Stylesheets -->
+   <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+   <style>
+       .tab-active {
+           border-bottom: 2px solid #4A90E2;
+           color: #4A90E2;
+       }
+       .performance-card {
+           transition: transform 0.3s ease;
+       }
+       .performance-card:hover {
+           transform: translateY(-5px);
+       }
+       .chart-container {
+           min-height: 400px;
+       }
+       #loading {
+           background-color: rgba(255, 255, 255, 0.9);
+       }
+       .growth-positive {
+           color: #10B981;
+       }
+       .growth-negative {
+           color: #EF4444;
+       }
+       .nav-tab {
+           cursor: pointer;
+           padding: 0.5rem 1rem;
+           transition: all 0.3s ease;
+       }
+       .nav-tab:hover {
+           background-color: #F3F4F6;
+       }
+       select {
+           padding: 0.5rem;
+           border-radius: 0.375rem;
+           border: 1px solid #D1D5DB;
+           width: 100%;
+           max-width: 20rem;
+       }
+   </style>
 </head>
 <body class="bg-gray-100">
-    <!-- Login Overlay -->
-    <div id="loginOverlay" class="fixed inset-0 bg-gray-900 flex items-center justify-center z-50">
-        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Social Media Analytics</h2>
-            <form id="loginForm" class="space-y-6">
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                    <input type="password" id="password" 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        required>
-                </div>
-                <div id="loginError" class="text-red-500 text-sm hidden">
-                    Incorrect password. Please try again.
-                </div>
-                <button type="submit" 
-                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    Login
-                </button>
-            </form>
-        </div>
-    </div>
+   <!-- Login Overlay -->
+   <div id="loginOverlay" class="fixed inset-0 bg-gray-900 flex items-center justify-center z-50">
+       <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+           <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Social Media Analytics</h2>
+           <form id="loginForm" class="space-y-6">
+               <div>
+                   <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                   <input type="password" id="password" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                       required>
+               </div>
+               <div id="loginError" class="text-red-500 text-sm hidden">
+                   Incorrect password. Please try again.
+               </div>
+               <button type="submit" 
+                   class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                   Login
+               </button>
+           </form>
+       </div>
+   </div>
 
-    <!-- Loading Spinner -->
-    <div id="loading" class="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 z-40 hidden">
-        <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-    </div>
+   <!-- Loading Spinner -->
+   <div id="loading" class="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 z-40 hidden">
+       <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+   </div>
 
-    <!-- Main Dashboard Container -->
-    <div id="dashboardContainer" class="container mx-auto px-4 py-8 hidden">
-        <!-- Header with Logout -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 space-y-4 md:space-y-0">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800">Social Media Analytics</h1>
-                <p class="text-gray-600 mt-2">Last updated: <span id="lastUpdated">Loading...</span></p>
-            </div>
-            <div class="flex space-x-4">
-                <button id="exportBtn" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors">
-                    Export Data
-                </button>
-                <button id="refreshBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">
-                    Refresh Data
-                </button>
-                <button id="logoutBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors">
-                    Logout
-                </button>
-            </div>
-        </div>
+   <!-- Main Dashboard Container -->
+   <div id="dashboardContainer" class="container mx-auto px-4 py-8 hidden">
+       <!-- Header with Logout -->
+       <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 space-y-4 md:space-y-0">
+           <div>
+               <h1 class="text-3xl font-bold text-gray-800">Social Media Analytics</h1>
+               <p class="text-gray-600 mt-2">Last updated: <span id="lastUpdated">Loading...</span></p>
+           </div>
+           <div class="flex space-x-4">
+               <button id="exportBtn" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors">
+                   Export Data
+               </button>
+               <button id="refreshBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">
+                   Refresh Data
+               </button>
+               <button id="logoutBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors">
+                   Logout
+               </button>
+           </div>
+       </div>
 
-        <!-- Dashboard Navigation -->
-        <nav class="mb-8 border-b border-gray-200">
-            <div class="flex space-x-4">
-                <button id="clientsTab" class="nav-tab tab-active">
-                    Client Accounts
-                </button>
-                <button id="weeklyTab" class="nav-tab">
-                    Weekly Performance
-                </button>
-                <button id="monthlyTab" class="nav-tab">
-                    Monthly Comparison
-                </button>
-                <button id="competitorsTab" class="nav-tab">
-                    Competitor Analysis
-                </button>
-            </div>
-        </nav>
+       <!-- Dashboard Navigation -->
+       <nav class="mb-8 border-b border-gray-200">
+           <div class="flex space-x-4">
+               <button id="clientsTab" class="nav-tab tab-active">
+                   Client Accounts
+               </button>
+               <button id="weeklyTab" class="nav-tab">
+                   Weekly Performance
+               </button>
+               <button id="monthlyTab" class="nav-tab">
+                   Monthly Comparison
+               </button>
+               <button id="competitorsTab" class="nav-tab">
+                   Competitor Analysis
+               </button>
+           </div>
+       </nav>
 
-        <!-- Clients Dashboard View -->
-        <div id="clientsView" class="space-y-8">
-            <!-- Performance Summary -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Best Performer Card -->
-                <div class="bg-white rounded-lg shadow p-6 performance-card">
-                    <h3 class="text-lg font-semibold text-green-600 mb-2">Best Performer</h3>
-                    <div id="bestPerformerClient" class="space-y-2">
-                        <p class="text-2xl font-bold">Loading...</p>
-                        <p class="text-gray-600">Growth: <span class="text-green-500">--</span></p>
-                        <p class="text-sm text-gray-500">Times as best performer: <span>--</span></p>
-                        <div class="mt-2 text-sm text-gray-500">
-                            <p>Current Followers: <span class="font-medium">--</span></p>
-                        </div>
-                    </div>
-                </div>
+       <!-- Clients Dashboard View -->
+       <div id="clientsView" class="space-y-8">
+           <!-- Performance Summary -->
+           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <!-- Best Performer Card -->
+               <div class="bg-white rounded-lg shadow p-6 performance-card">
+                   <h3 class="text-lg font-semibold text-green-600 mb-2">Best Performer</h3>
+                   <div id="bestPerformerClient" class="space-y-2">
+                       <p class="text-2xl font-bold">Loading...</p>
+                       <p class="text-gray-600">Growth: <span class="text-green-500">--</span></p>
+                       <p class="text-sm text-gray-500">Times as best performer: <span>--</span></p>
+                       <div class="mt-2 text-sm text-gray-500">
+                           <p>Current Followers: <span class="font-medium">--</span></p>
+                       </div>
+                   </div>
+               </div>
 
-                <!-- Worst Performer Card -->
-                <div class="bg-white rounded-lg shadow p-6 performance-card">
-                    <h3 class="text-lg font-semibold text-red-600 mb-2">Needs Attention</h3>
-                    <div id="worstPerformerClient" class="space-y-2">
-                        <p class="text-2xl font-bold">Loading...</p>
-                        <p class="text-gray-600">Growth: <span class="text-red-500">--</span></p>
-                        <p class="text-sm text-gray-500">Times needing attention: <span>--</span></p>
-                        <div class="mt-2 text-sm text-gray-500">
-                            <p>Current Followers: <span class="font-medium">--</span></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+               <!-- Worst Performer Card -->
+               <div class="bg-white rounded-lg shadow p-6 performance-card">
+                   <h3 class="text-lg font-semibold text-red-600 mb-2">Needs Attention</h3>
+                   <div id="worstPerformerClient" class="space-y-2">
+                       <p class="text-2xl font-bold">Loading...</p>
+                       <p class="text-gray-600">Growth: <span class="text-red-500">--</span></p>
+                       <p class="text-sm text-gray-500">Times needing attention: <span>--</span></p>
+                       <div class="mt-2 text-sm text-gray-500">
+                           <p>Current Followers: <span class="font-medium">--</span></p>
+                       </div>
+                   </div>
+               </div>
+           </div>
 
-            <!-- Individual Client Scorecards -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold mb-4">Individual Account Performance</h3>
-                <div id="individualScorecardsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Populated by JavaScript -->
-                </div>
-            </div>
+           <!-- Individual Client Scorecards -->
+           <div class="bg-white rounded-lg shadow p-6">
+               <h3 class="text-lg font-semibold mb-4">Individual Account Performance</h3>
+               <div id="individualScorecardsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                   <!-- Populated by JavaScript -->
+               </div>
+           </div>
 
-            <!-- Monthly Performance Summary -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Monthly Summary -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold mb-4">Monthly Performance Summary</h3>
-                    <div id="monthlySummary" class="space-y-4">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-gray-50 p-4 rounded">
-                                <h4 class="text-sm text-gray-600">Most Improved</h4>
-                                <div id="mostImproved" class="mt-2"></div>
-                            </div>
-                            <div class="bg-gray-50 p-4 rounded">
-                                <h4 class="text-sm text-gray-600">Needs Focus</h4>
-                                <div id="needsFocus" class="mt-2"></div>
-                            </div>
-                        </div>
-                        <div class="bg-gray-50 p-4 rounded">
-                            <h4 class="text-sm text-gray-600">Overall Growth</h4>
-                            <div id="overallGrowth" class="mt-2"></div>
-                        </div>
-                    </div>
-                </div>
+           <!-- Monthly Performance Summary -->
+           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+               <!-- Monthly Summary -->
+               <div class="bg-white rounded-lg shadow p-6">
+                   <h3 class="text-lg font-semibold mb-4">Monthly Performance Summary</h3>
+                   <div id="monthlySummary" class="space-y-4">
+                       <div class="grid grid-cols-2 gap-4">
+                           <div class="bg-gray-50 p-4 rounded">
+                               <h4 class="text-sm text-gray-600">Most Improved</h4>
+                               <div id="mostImproved" class="mt-2"></div>
+                           </div>
+                           <div class="bg-gray-50 p-4 rounded">
+                               <h4 class="text-sm text-gray-600">Needs Focus</h4>
+                               <div id="needsFocus" class="mt-2"></div>
+                           </div>
+                       </div>
+                       <div class="bg-gray-50 p-4 rounded">
+                           <h4 class="text-sm text-gray-600">Overall Growth</h4>
+                           <div id="overallGrowth" class="mt-2"></div>
+                       </div>
+                   </div>
+               </div>
 
-                <!-- Month over Month Chart -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold mb-4">Month over Month Comparison</h3>
-                    <div id="monthlyComparisonChart" class="h-80"></div>
-                </div>
-            </div>
+               <!-- Month over Month Chart -->
+               <div class="bg-white rounded-lg shadow p-6">
+                   <h3 class="text-lg font-semibold mb-4">Month over Month Comparison</h3>
+                   <div id="monthlyComparisonChart" class="h-80"></div>
+               </div>
+           </div>
 
-            <!-- Growth Charts -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold mb-4">Monthly Growth Trends</h3>
-                <div id="clientGrowthChart" class="chart-container"></div>
-            </div>
-        </div>
+           <!-- Growth Charts -->
+           <div class="bg-white rounded-lg shadow p-6">
+               <h3 class="text-lg font-semibold mb-4">Monthly Growth Trends</h3>
+               <div id="clientGrowthChart" class="chart-container"></div>
+           </div>
 
-        <!-- Weekly Performance View -->
-        <div id="weeklyView" class="space-y-8 hidden">
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold mb-4">Week to Week Account Comparison</h3>
-                <div class="flex flex-col md:flex-row gap-4 mb-6">
-                    <div class="flex-1">
-                        <label for="weeklyAccountSelect" class="block text-sm font-medium text-gray-700 mb-1">Select Account</label>
-                        <select id="weeklyAccountSelect" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                            <!-- Populated by JavaScript -->
-                        </select>
-                    </div>
-                    <div class="flex-1">
-                        <label for="weekSelect1" class="block text-sm font-medium text-gray-700 mb-1">First Week</label>
-                        <select id="weekSelect1" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                            <!-- Populated by JavaScript -->
-                        </select>
-                    </div>
-                    <div class="flex-1">
-                        <label for="weekSelect2" class="block text-sm font-medium text-gray-700 mb-1">Second Week</label>
-                        <select id="weekSelect2" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                            <!-- Populated by JavaScript -->
-                        </select>
-                    </div>
-                </div>
-                <div id="weekComparisonResult" class="mt-4 p-4 bg-gray-50 rounded-lg">
-                    <!-- Week comparison results will be displayed here -->
-                </div>
-            </div>
-        </div>
+           <!-- Monthly Followers Table -->
+           <div class="bg-white rounded-lg shadow p-6">
+               <h3 class="text-lg font-semibold mb-4">Monthly Followers Summary</h3>
+               <div class="overflow-x-auto">
+                   <table id="monthlyFollowersTable" class="min-w-full table-auto">
+                       <thead class="bg-gray-50">
+                           <tr>
+                               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account</th>
+                               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Oct Followers</th>
+                               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nov Followers</th>
+                               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dec Followers</th>
+                               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Growth</th>
+                           </tr>
+                       </thead>
+                       <tbody class="bg-white divide-y divide-gray-200">
+                           <!-- Populated by JavaScript -->
+                       </tbody>
+                   </table>
+               </div>
+           </div>
+       </div>
 
-        <!-- Monthly Comparison View -->
-        <div id="monthlyView" class="space-y-8 hidden">
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold mb-4">Month to Month Account Comparison</h3>
-                <div class="flex flex-col md:flex-row gap-4 mb-6">
-                    <div class="flex-1">
-                        <label for="accountSelect" class="block text-sm font-medium text-gray-700 mb-1">Select Account</label>
-                        <select id="accountSelect" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                            <!-- Populated by JavaScript -->
-                        </select>
-                    </div>
-                    <div class="flex-1">
-                        <label for="monthSelect1" class="block text-sm font-medium text-gray-700 mb-1">First Month</label>
-                        <select id="monthSelect1" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                            <!-- Populated by JavaScript -->
-                        </select>
-                    </div>
-                    <div class="flex-1">
-                        <label for="monthSelect2" class="block text-sm font-medium text-gray-700 mb-1">Second Month</label>
-                        <select id="monthSelect2" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                            <!-- Populated by JavaScript -->
-                        </select>
-                    </div>
-                </div>
-                <div id="monthComparisonResult" class="mt-4 p-4 bg-gray-50 rounded-lg">
-                    <!-- Month comparison results will be displayed here -->
-                </div>
-            </div>
-        </div>
+       <!-- Weekly Performance View -->
+       <div id="weeklyView" class="space-y-8 hidden">
+           <div class="bg-white rounded-lg shadow p-6">
+               <h3 class="text-lg font-semibold mb-4">Week to Week Account Comparison</h3>
+               <div class="flex flex-col md:flex-row gap-4 mb-6">
+                   <div class="flex-1">
+                       <label for="weeklyAccountSelect" class="block text-sm font-medium text-gray-700 mb-1">Select Account</label>
+                       <select id="weeklyAccountSelect" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                           <!-- Populated by JavaScript -->
+                       </select>
+                   </div>
+                   <div class="flex-1">
+                       <label for="weekSelect1" class="block text-sm font-medium text-gray-700 mb-1">First Week</label>
+                       <select id="weekSelect1" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                           <!-- Populated by JavaScript -->
+                       </select>
+                   </div>
+                   <div class="flex-1">
+                       <label for="weekSelect2" class="block text-sm font-medium text-gray-700 mb-1">Second Week</label>
+                       <select id="weekSelect2" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                           <!-- Populated by JavaScript -->
+                       </select>
+                   </div>
+               </div>
+               <div id="weekComparisonResult" class="mt-4 p-4 bg-gray-50 rounded-lg">
+                   <!-- Week comparison results will be displayed here -->
+               </div>
+           </div>
+       </div>
 
-        <!-- Competitors Dashboard View -->
-        <div id="competitorsView" class="space-y-8 hidden">
-            <!-- Competitor Performance Summary -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Leading Competitor Card -->
-                <div class="bg-white rounded-lg shadow p-6 performance-card">
-                    <h3 class="text-lg font-semibold text-blue-600 mb-2">Leading Competitor</h3>
-                    <div id="bestPerformerCompetitor" class="space-y-2">
-                        <p class="text-2xl font-bold">Loading...</p>
-                        <p class="text-gray-600">Growth: <span class="text-blue-500">--</span></p>
-                        <div class="mt-2 text-sm text-gray-500">
-                            <p>Current Followers: <span class="font-medium">--</span></p>
-                        </div>
-                    </div>
-                </div>
+       <!-- Monthly Comparison View -->
+       <div id="monthlyView" class="space-y-8 hidden">
+           <div class="bg-white rounded-lg shadow p-6">
+               <h3 class="text-lg font-semibold mb-4">Month to Month Account Comparison</h3>
+               <div class="flex flex-col md:flex-row gap-4 mb-6">
+                   <div class="flex-1">
+                       <label for="accountSelect" class="block text-sm font-medium text-gray-700 mb-1">Select Account</label>
+                       <select id="accountSelect" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                           <!-- Populated by JavaScript -->
+                       </select>
+                   </div>
+                   <div class="flex-1">
+                       <label for="monthSelect1" class="block text-sm font-medium text-gray-700 mb-1">First Month</label>
+                       <select id="monthSelect1" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                           <!-- Populated by JavaScript -->
+                       </select>
+                   </div>
+                   <div class="flex-1">
+                       <label for="monthSelect2" class="block text-sm font-medium text-gray-700 mb-1">Second Month</label>
+                       <select id="monthSelect2" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                           <!-- Populated by JavaScript -->
+                       </select>
+                   </div>
+               </div>
+               <div id="monthComparisonResult" class="mt-4 p-4 bg-gray-50 rounded-lg">
+                   <!-- Month comparison results will be displayed here -->
+               </div>
+           </div>
+       </div>
 
-                <!-- Slowest Growth Card -->
-                <div class="bg-white rounded-lg shadow p-6 performance-card">
-                    <h3 class="text-lg font-semibold text-gray-600 mb-2">Slowest Growth</h3>
-                    <div id="worstPerformerCompetitor" class="space-y-2">
-                        <p class="text-2xl font-bold">Loading...</p>
-                        <p class="text-gray-600">Growth: <span class="text-gray-500">--</span></p>
-                        <div class="mt-2 text-sm text-gray-500">
-                            <p>Current Followers: <span class="font-medium">--</span></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+       <!-- Competitors Dashboard View -->
+       <div id="competitorsView" class="space-y-8 hidden">
+           <!-- Competitor Performance Summary -->
+           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <!-- Leading Competitor Card -->
+               <div class="bg-white rounded-lg shadow p-6 performance-card">
+                   <h3 class="text-lg font-semibold text-blue-600 mb-2">Leading Competitor</h3>
+                   <div id="bestPerformerCompetitor" class="space-y-2">
+                       <p class="text-2xl font-bold">Loading...</p>
+                       <p class="text-gray-600">Growth: <span class="text-blue-500">--</span></p>
+                       <div class="mt-2 text-sm text-gray-500">
+                           <p>Current Followers: <span class="font-medium">--</span></p>
+                       </div>
+                   </div>
+               </div>
 
-            <!-- Competitor Charts -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold mb-4">Competitor Growth Comparison</h3>
-                <div id="competitorGrowthChart" class="chart-container"></div>
-            </div>
+               <!-- Slowest Growth Card -->
+               <div class="bg-white rounded-lg shadow p-6 performance-card">
+                   <h3 class="text-lg font-semibold text-gray-600 mb-2">Slowest Growth</h3>
+                   <div id="worstPerformerCompetitor" class="space-y-2">
+                       <p class="text-2xl font-bold">Loading...</p>
+                       <p class="text-gray-600">Growth: <span class="text-gray-500">--</span></p>
+                       <div class="mt-2 text-sm text-gray-500">
+                           <p>Current Followers: <span class="font-medium">--</span></p>
+                       </div>
+                   </div>
+               </div>
+           </div>
 
-            <!-- Competitor Comparison Table -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold mb-4">Competitor Comparison</h3>
-                <div class="overflow-x-auto">
-                    <table id="competitorComparisonTable" class="min-w-full table-auto">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Competitor</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Followers</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monthly Growth</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Market Share</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <!-- Populated by JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+           <!-- Competitor Charts -->
+           <div class="bg-white rounded-lg shadow p-6">
+               <h3 class="text-lg font-semibold mb-4">Competitor Growth Comparison</h3>
+               <div id="competitorGrowthChart" class="chart-container"></div>
+           </div>
 
-    <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash/4.17.21/lodash.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-    <script src="script.js"></script>
+           <!-- Competitor Comparison Table -->
+           <div class="bg-white rounded-lg shadow p-6">
+               <h3 class="text-lg font-semibold mb-4">Competitor Comparison</h3>
+               <div class="overflow-x-auto">
+                   <table id="competitorComparisonTable" class="min-w-full table-auto">
+                       <thead class="bg-gray-50">
+                           <tr>
+                               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Competitor</th>
+                               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Followers</th>
+                               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monthly Growth</th>
+                               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Market Share</th>
+                           </tr>
+                       </thead>
+                       <tbody class="bg-white divide-y divide-gray-200">
+                           <!-- Populated by JavaScript -->
+                       </tbody>
+                   </table>
+               </div>
+           </div>
+       </div>
+   </div>
+
+   <!-- Scripts -->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash/4.17.21/lodash.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+   <script src="script.js"></script>
 </body>
 </html>
