@@ -31,7 +31,8 @@ function setupMonthToMonthComparison(data) {
 
     // Get accounts and dates
     const accounts = Object.keys(data.data[0]).filter(key => key !== 'Date');
-    const dates = data.data.map(d => ({
+    const monthlyData = aggregateMonthlyData(data.data);
+    const dates = monthlyData.map(d => ({
         value: d.Date,
         label: moment(d.Date).format('MMMM YYYY')
     }));
@@ -49,14 +50,14 @@ function setupMonthToMonthComparison(data) {
     monthSelect2.innerHTML = monthOptions;
 
     // Set default selections
-    monthSelect2.selectedIndex = dates.length - 1;  // Latest month
-    monthSelect1.selectedIndex = dates.length - 2;  // Previous month
+    monthSelect2.selectedIndex = dates.length - 1;
+    monthSelect1.selectedIndex = dates.length - 2;
 
     // Add event listeners
     const updateComparison = () => {
         const account = accountSelect.value;
-        const month1Data = data.data.find(d => d.Date === monthSelect1.value);
-        const month2Data = data.data.find(d => d.Date === monthSelect2.value);
+        const month1Data = monthlyData.find(d => d.Date === monthSelect1.value);
+        const month2Data = monthlyData.find(d => d.Date === monthSelect2.value);
 
         if (month1Data && month2Data) {
             const followers1 = month1Data[account];
@@ -95,19 +96,105 @@ function setupMonthToMonthComparison(data) {
     monthSelect1.addEventListener('change', updateComparison);
     monthSelect2.addEventListener('change', updateComparison);
 
-    // Initial comparison
     updateComparison();
+}
+
+function setupWeekToWeekComparison(data) {
+    if (!data?.data || data.data.length < 2) return;
+
+    const weeklyAccountSelect = document.getElementById('weeklyAccountSelect');
+    const weekSelect1 = document.getElementById('weekSelect1');
+    const weekSelect2 = document.getElementById('weekSelect2');
+
+    const accounts = Object.keys(data.data[0]).filter(key => key !== 'Date');
+    const dates = data.data.map(d => ({
+        value: d.Date,
+        label: moment(d.Date).format('MMM D, YYYY')
+    }));
+
+    weeklyAccountSelect.innerHTML = accounts.map(account => 
+        `<option value="${account}">${account}</option>`
+    ).join('');
+
+    const weekOptions = dates.map(date => 
+        `<option value="${date.value}">${date.label}</option>`
+    ).join('');
+    weekSelect1.innerHTML = weekOptions;
+    weekSelect2.innerHTML = weekOptions;
+
+    weekSelect2.selectedIndex = dates.length - 1;
+    weekSelect1.selectedIndex = dates.length - 2;
+
+    const updateWeekComparison = () => {
+        const account = weeklyAccountSelect.value;
+        const week1Data = data.data.find(d => d.Date === weekSelect1.value);
+        const week2Data = data.data.find(d => d.Date === weekSelect2.value);
+
+        if (week1Data && week2Data) {
+            const followers1 = week1Data[account];
+            const followers2 = week2Data[account];
+            const difference = followers2 - followers1;
+            const growth = ((followers2 - followers1) / followers1) * 100;
+
+            document.getElementById('weekComparisonResult').innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="p-4 bg-white rounded-lg shadow">
+                        <h4 class="text-sm font-medium text-gray-500">${moment(weekSelect1.value).format('MMM D, YYYY')}</h4>
+                        <p class="text-xl font-bold mt-1">${followers1.toLocaleString()}</p>
+                    </div>
+                    <div class="p-4 bg-white rounded-lg shadow">
+                        <h4 class="text-sm font-medium text-gray-500">${moment(weekSelect2.value).format('MMM D, YYYY')}</h4>
+                        <p class="text-xl font-bold mt-1">${followers2.toLocaleString()}</p>
+                    </div>
+                    <div class="p-4 bg-white rounded-lg shadow">
+                        <h4 class="text-sm font-medium text-gray-500">Follower Change</h4>
+                        <p class="text-xl font-bold mt-1 ${difference >= 0 ? 'text-green-500' : 'text-red-500'}">
+                            ${difference >= 0 ? '+' : ''}${difference.toLocaleString()}
+                        </p>
+                    </div>
+                    <div class="p-4 bg-white rounded-lg shadow">
+                        <h4 class="text-sm font-medium text-gray-500">Growth Rate</h4>
+                        <p class="text-xl font-bold mt-1 ${growth >= 0 ? 'text-green-500' : 'text-red-500'}">
+                            ${growth >= 0 ? '+' : ''}${growth.toFixed(2)}%
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+    };
+
+    weeklyAccountSelect.addEventListener('change', updateWeekComparison);
+    weekSelect1.addEventListener('change', updateWeekComparison);
+    weekSelect2.addEventListener('change', updateWeekComparison);
+
+    updateWeekComparison();
+}
+
+function aggregateMonthlyData(data) {
+    const monthlyData = {};
+    
+    data.forEach(entry => {
+        const monthKey = moment(entry.Date).format('YYYY-MM-01');
+        if (!monthlyData[monthKey]) {
+            monthlyData[monthKey] = { Date: monthKey };
+            Object.keys(entry).forEach(key => {
+                if (key !== 'Date') {
+                    monthlyData[monthKey][key] = entry[key];
+                }
+            });
+        }
+    });
+
+    return Object.values(monthlyData).sort((a, b) => moment(a.Date).diff(moment(b.Date)));
 }
 
 function checkAuth() {
     const auth = sessionStorage.getItem('dashboardAuth');
     if (auth === 'true') {
-        console.log('Found existing auth');
         isAuthenticated = true;
         hideLoginScreen();
         initDashboard();
     } else {
-        console.log('No existing auth found');
         showLoginScreen();
     }
 }
@@ -125,16 +212,13 @@ function hideLoginScreen() {
 function handleLogin(e) {
     e.preventDefault();
     const password = document.getElementById('password').value;
-    console.log('Login attempt');
     
     if (password === CORRECT_PASSWORD) {
-        console.log('Login successful');
         isAuthenticated = true;
         sessionStorage.setItem('dashboardAuth', 'true');
         hideLoginScreen();
         initDashboard();
     } else {
-        console.log('Login failed - incorrect password');
         document.getElementById('loginError').classList.remove('hidden');
         document.getElementById('password').value = '';
     }
@@ -144,7 +228,6 @@ function handleLogout() {
     isAuthenticated = false;
     sessionStorage.removeItem('dashboardAuth');
     showLoginScreen();
-    console.log('Logged out');
 }
 
 function debounce(func, wait) {
@@ -162,16 +245,12 @@ function debounce(func, wait) {
 async function initDashboard() {
     try {
         toggleLoading(true);
-        console.log('Fetching data...');
-        
         const response = await fetch('./data/processed_followers.json');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         currentData = await response.json();
-        console.log('Data loaded:', currentData);
-        
         initializeCharts();
         setupEventListeners();
         updateDashboard();
@@ -198,6 +277,8 @@ function toggleLoading(show) {
 
 function setupEventListeners() {
     document.getElementById('clientsTab').addEventListener('click', () => switchTab('clients'));
+    document.getElementById('weeklyTab').addEventListener('click', () => switchTab('weekly'));
+    document.getElementById('monthlyTab').addEventListener('click', () => switchTab('monthly'));
     document.getElementById('competitorsTab').addEventListener('click', () => switchTab('competitors'));
     document.getElementById('refreshBtn').addEventListener('click', initDashboard);
     document.getElementById('exportBtn').addEventListener('click', exportData);
@@ -211,11 +292,17 @@ function setupEventListeners() {
 }
 
 function switchTab(tab) {
-    const isClients = tab === 'clients';
-    document.getElementById('clientsTab').classList.toggle('tab-active', isClients);
-    document.getElementById('competitorsTab').classList.toggle('tab-active', !isClients);
-    document.getElementById('clientsView').classList.toggle('hidden', !isClients);
-    document.getElementById('competitorsView').classList.toggle('hidden', isClients);
+    ['clientsTab', 'weeklyTab', 'monthlyTab', 'competitorsTab'].forEach(tabId => {
+        document.getElementById(tabId).classList.remove('tab-active');
+    });
+    
+    ['clientsView', 'weeklyView', 'monthlyView', 'competitorsView'].forEach(viewId => {
+        document.getElementById(viewId).classList.add('hidden');
+    });
+    
+    document.getElementById(`${tab}Tab`).classList.add('tab-active');
+    document.getElementById(`${tab}View`).classList.remove('hidden');
+    
     resizeCharts();
 }
 
@@ -232,14 +319,13 @@ function resizeCharts() {
 function updateDashboard() {
     if (!currentData) return;
 
-    // Update last updated time
     const lastUpdatedTime = moment(currentData.lastUpdated).format('MMMM D, YYYY h:mm A');
     document.getElementById('lastUpdated').textContent = lastUpdatedTime;
     
-    // Update dashboards if data exists
     if (currentData.clients?.data) {
         updateClientDashboard(currentData.clients);
         setupMonthToMonthComparison(currentData.clients);
+        setupWeekToWeekComparison(currentData.clients);
     }
     if (currentData.competitors?.data) updateCompetitorDashboard(currentData.competitors);
 }
@@ -305,7 +391,6 @@ function updateMonthlySummary(data) {
     const lastTwoMonths = data.data.slice(-2);
     const accounts = Object.keys(lastTwoMonths[0]).filter(key => key !== 'Date');
     
-    // Calculate growth for all accounts
     const growthData = accounts.map(account => {
         const currentValue = lastTwoMonths[1][account];
         const previousValue = lastTwoMonths[0][account];
@@ -313,10 +398,8 @@ function updateMonthlySummary(data) {
         return { account, growth, currentValue, previousValue };
     });
 
-    // Sort by growth
     growthData.sort((a, b) => b.growth - a.growth);
 
-    // Most improved account
     const mostImproved = growthData[0];
     document.getElementById('mostImproved').innerHTML = `
         <p class="font-medium">${mostImproved.account}</p>
@@ -324,7 +407,6 @@ function updateMonthlySummary(data) {
         <p class="text-sm text-gray-500">${mostImproved.currentValue.toLocaleString()} followers</p>
     `;
 
-    // Account needing focus
     const needsFocus = growthData[growthData.length - 1];
     document.getElementById('needsFocus').innerHTML = `
         <p class="font-medium">${needsFocus.account}</p>
@@ -332,7 +414,6 @@ function updateMonthlySummary(data) {
         <p class="text-sm text-gray-500">${needsFocus.currentValue.toLocaleString()} followers</p>
     `;
 
-    // Overall growth
     const totalPrevious = growthData.reduce((sum, item) => sum + item.previousValue, 0);
     const totalCurrent = growthData.reduce((sum, item) => sum + item.currentValue, 0);
     const overallGrowth = ((totalCurrent - totalPrevious) / totalPrevious) * 100;
@@ -372,7 +453,6 @@ function updateMonthlyComparison(data) {
         return { account, growth };
     });
 
-    // Sort by growth for better visualization
     growthData.sort((a, b) => b.growth - a.growth);
 
     const option = {
@@ -422,7 +502,7 @@ function updateMonthlyComparison(data) {
 function updateClientGrowthChart(data) {
     if (!data || !data.length) return;
     
-    const months = data.map(d => moment(d.Date).format('MMM YYYY'));
+    const months = data.map(d => moment(d.Date).format('MMM D, YYYY'));
     const accounts = Object.keys(data[0]).filter(key => key !== 'Date');
     
     const series = accounts.map(account => ({
@@ -472,7 +552,7 @@ function updateClientGrowthChart(data) {
 function updateCompetitorGrowthChart(data) {
     if (!data || !data.length) return;
     
-    const months = data.map(d => moment(d.Date).format('MMM YYYY'));
+    const months = data.map(d => moment(d.Date).format('MMM D, YYYY'));
     const competitors = Object.keys(data[0]).filter(key => key !== 'Date');
     
     const series = competitors.map(competitor => ({
@@ -558,16 +638,6 @@ function updateCompetitorComparisonTable(data) {
             </tr>
         `;
     }).join('');
-}
-
-function calculateAverageGrowth(data, account) {
-    const growthRates = data.map((current, index) => {
-        if (index === 0) return 0;
-        const previous = data[index - 1][account];
-        return ((current[account] - previous) / previous) * 100;
-    }).slice(1);
-    
-    return growthRates.reduce((sum, rate) => sum + rate, 0) / growthRates.length;
 }
 
 function calculateGrowthRates(data, account) {
