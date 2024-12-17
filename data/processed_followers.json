@@ -2,13 +2,31 @@
   "clients": {
     "data": [
       {
-        "Date": "10/1/2024 16:00:00",
+        "reddymadedesign": null,
+        "rottetcollection": null,
+        "lrottet": null,
+        "rottetstudio": null,
+        "StudioCAHS": null,
+        "caterinahstewart": null,
+        "lucreziabuccellati": null,
+        "lindsaybartonbarrett": null,
+        "forddrive": null,
+        "alfredoparedesstudio": null,
+        "bobbyanspachstudiosfoundation": null,
+        "liveone38": null,
+        "200e20th": null,
+        "williamsburgwharf": null,
+        "westwharfbk": null,
+        "aspromisedmag": null
+      },
+      {
+        "Date": "10/1/2024",
         "reddymadedesign": 17723,
         "rottetcollection": 26145,
         "lrottet": 67418,
         "rottetstudio": 17986,
         "StudioCAHS": 21852,
-        "caterinahstewart": null,
+        "caterinahstewart": 9797,
         "lucreziabuccellati": 18415,
         "lindsaybartonbarrett": 3411,
         "forddrive": 3561,
@@ -18,10 +36,86 @@
         "200e20th": 2418,
         "williamsburgwharf": 1101,
         "westwharfbk": 1606,
-        "aspromisedmag": 4601
+        "aspromisedmag": null
       },
       {
-        "Date": "2024-11-01 16:08:50",
+        "Date": "10/9/2024",
+        "reddymadedesign": 17749,
+        "rottetcollection": 26368,
+        "lrottet": 68168,
+        "rottetstudio": 18121,
+        "StudioCAHS": 21842,
+        "caterinahstewart": 9797,
+        "lucreziabuccellati": 18620,
+        "lindsaybartonbarrett": 3478,
+        "forddrive": 3590,
+        "alfredoparedesstudio": 46534,
+        "bobbyanspachstudiosfoundation": 8357,
+        "liveone38": 2366,
+        "200e20th": 2442,
+        "williamsburgwharf": 1137,
+        "westwharfbk": 1621,
+        "aspromisedmag": null
+      },
+      {
+        "Date": "10/16/2024",
+        "reddymadedesign": 17751,
+        "rottetcollection": 26632,
+        "lrottet": 68358,
+        "rottetstudio": 18221,
+        "StudioCAHS": 21832,
+        "caterinahstewart": 9794,
+        "lucreziabuccellati": 18837,
+        "lindsaybartonbarrett": 3524,
+        "forddrive": 3629,
+        "alfredoparedesstudio": 46588,
+        "bobbyanspachstudiosfoundation": 8370,
+        "liveone38": 2377,
+        "200e20th": 2467,
+        "williamsburgwharf": 1166,
+        "westwharfbk": 1633,
+        "aspromisedmag": null
+      },
+      {
+        "Date": "10/23/2024",
+        "reddymadedesign": 17779,
+        "rottetcollection": 26629,
+        "lrottet": 68260,
+        "rottetstudio": 18256,
+        "StudioCAHS": 21819,
+        "caterinahstewart": 9785,
+        "lucreziabuccellati": 19143,
+        "lindsaybartonbarrett": 3562,
+        "forddrive": 3653,
+        "alfredoparedesstudio": 46823,
+        "bobbyanspachstudiosfoundation": 8379,
+        "liveone38": 2446,
+        "200e20th": 2519,
+        "williamsburgwharf": 1194,
+        "westwharfbk": 1639,
+        "aspromisedmag": null
+      },
+      {
+        "Date": "10/30/2024",
+        "reddymadedesign": 17891,
+        "rottetcollection": 26969,
+        "lrottet": 68538,
+        "rottetstudio": 18282,
+        "StudioCAHS": 21796,
+        "caterinahstewart": 9778,
+        "lucreziabuccellati": 19192,
+        "lindsaybartonbarrett": 3591,
+        "forddrive": 3683,
+        "alfredoparedesstudio": 46847,
+        "bobbyanspachstudiosfoundation": 8388,
+        "liveone38": 2444,
+        "200e20th": 2535,
+        "williamsburgwharf": 1217,
+        "westwharfbk": 1669,
+        "aspromisedmag": null
+      },
+      {
+        "Date": "11/1/2024",
         "reddymadedesign": 17999,
         "rottetcollection": 27051,
         "lrottet": 68656,
@@ -37,10 +131,86 @@
         "200e20th": 2537,
         "williamsburgwharf": 1229,
         "westwharfbk": 1673,
-        "aspromisedmag": 4601
+        "aspromisedmag": null
       },
       {
-        "Date": "2024-12-02 9:42:33",
+        "Date": "11/6/2024",
+        "reddymadedesign": 18072,
+        "rottetcollection": 27127,
+        "lrottet": 68810,
+        "rottetstudio": 18329,
+        "StudioCAHS": 21666,
+        "caterinahstewart": 9773,
+        "lucreziabuccellati": 19587,
+        "lindsaybartonbarrett": 3624,
+        "forddrive": 3700,
+        "alfredoparedesstudio": 46950,
+        "bobbyanspachstudiosfoundation": 8419,
+        "liveone38": 2455,
+        "200e20th": 2560,
+        "williamsburgwharf": 1258,
+        "westwharfbk": 1676,
+        "aspromisedmag": null
+      },
+      {
+        "Date": "11/14/2024",
+        "reddymadedesign": 18240,
+        "rottetcollection": 27176,
+        "lrottet": 69344,
+        "rottetstudio": 18473,
+        "StudioCAHS": 21625,
+        "caterinahstewart": 9785,
+        "lucreziabuccellati": 19934,
+        "lindsaybartonbarrett": 3826,
+        "forddrive": 3730,
+        "alfredoparedesstudio": 47002,
+        "bobbyanspachstudiosfoundation": 8435,
+        "liveone38": 2448,
+        "200e20th": 2578,
+        "williamsburgwharf": 1289,
+        "westwharfbk": 1689,
+        "aspromisedmag": 4654
+      },
+      {
+        "Date": "11/20/2024",
+        "reddymadedesign": 18274,
+        "rottetcollection": 27366,
+        "lrottet": 69545,
+        "rottetstudio": 18566,
+        "StudioCAHS": 21635,
+        "caterinahstewart": 9782,
+        "lucreziabuccellati": 20078,
+        "lindsaybartonbarrett": 3862,
+        "forddrive": 3773,
+        "alfredoparedesstudio": 47048,
+        "bobbyanspachstudiosfoundation": 8430,
+        "liveone38": 2447,
+        "200e20th": 2597,
+        "williamsburgwharf": 1321,
+        "westwharfbk": 1695,
+        "aspromisedmag": 4724
+      },
+      {
+        "Date": "11/27/2024",
+        "reddymadedesign": 18316,
+        "rottetcollection": 27451,
+        "lrottet": 69932,
+        "rottetstudio": 18646,
+        "StudioCAHS": 21747,
+        "caterinahstewart": 9782,
+        "lucreziabuccellati": 20261,
+        "lindsaybartonbarrett": 3926,
+        "forddrive": 3799,
+        "alfredoparedesstudio": 47085,
+        "bobbyanspachstudiosfoundation": 8429,
+        "liveone38": 2428,
+        "200e20th": 2600,
+        "williamsburgwharf": 1396,
+        "westwharfbk": 1701,
+        "aspromisedmag": 4775
+      },
+      {
+        "Date": "12/2/2024",
         "reddymadedesign": 18322,
         "rottetcollection": 27612,
         "lrottet": 70186,
@@ -52,32 +222,56 @@
         "forddrive": 3808,
         "alfredoparedesstudio": 47105,
         "bobbyanspachstudiosfoundation": 8425,
-        "liveone38": 2426,
+        "liveone38": 2421,
         "200e20th": 2599,
         "williamsburgwharf": 1398,
         "westwharfbk": 1699,
         "aspromisedmag": 4799
+      },
+      {
+        "Date": "12/11/2024",
+        "reddymadedesign": 18392,
+        "rottetcollection": 28860,
+        "lrottet": 71066,
+        "rottetstudio": 18685,
+        "StudioCAHS": 21664,
+        "caterinahstewart": 9779,
+        "lucreziabuccellati": 20448,
+        "lindsaybartonbarrett": 4522,
+        "forddrive": 3842,
+        "alfredoparedesstudio": 47290,
+        "bobbyanspachstudiosfoundation": 8416,
+        "liveone38": 2426,
+        "200e20th": 2598,
+        "williamsburgwharf": 1420,
+        "westwharfbk": 1736,
+        "aspromisedmag": 4853
       }
     ],
     "performers": {
       "best": {
-        "account": "williamsburgwharf",
-        "growth": 13.751017087062653,
-        "currentFollowers": 1398
+        "account": "lindsaybartonbarrett",
+        "growth": 12.937062937062937,
+        "currentFollowers": 4522
       },
       "worst": {
-        "account": "liveone38",
-        "growth": -1.2617012617012617,
-        "currentFollowers": 2426
+        "account": "StudioCAHS",
+        "growth": -0.36333532631191645,
+        "currentFollowers": 21664
       }
     },
     "performanceHistory": {
       "bestPerformer": {
-        "williamsburgwharf": 2
+        "liveone38": 2,
+        "williamsburgwharf": 6,
+        "lindsaybartonbarrett": 3
       },
       "worstPerformer": {
-        "StudioCAHS": 1,
-        "liveone38": 1
+        "StudioCAHS": 5,
+        "lrottet": 1,
+        "caterinahstewart": 1,
+        "liveone38": 3,
+        "bobbyanspachstudiosfoundation": 1
       }
     }
   },
@@ -125,5 +319,5 @@
       }
     }
   },
-  "lastUpdated": "2024-12-16T12:36:22.532Z"
+  "lastUpdated": "2024-12-17T12:35:28.332Z"
 }
