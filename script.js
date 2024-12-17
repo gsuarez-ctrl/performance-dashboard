@@ -11,17 +11,6 @@ let charts = {
 
 let currentData = null;
 
-// Parse date helper function
-function parseDate(dateStr) {
-    if (!dateStr) return moment();
-    try {
-        return moment(dateStr, 'M/D/YYYY');
-    } catch (error) {
-        console.error('Date parsing error:', error);
-        return moment();
-    }
-}
-
 function setupMonthToMonthComparison(data) {
     if (!data || data.length < 2) return;
 
@@ -29,35 +18,41 @@ function setupMonthToMonthComparison(data) {
     const monthSelect1 = document.getElementById('monthSelect1');
     const monthSelect2 = document.getElementById('monthSelect2');
 
-    // Get accounts and dates
     const accounts = Object.keys(data[0]).filter(key => key !== 'Date');
-    const monthlyData = aggregateMonthlyData(data);
-    const dates = monthlyData.map(d => ({
+    const monthlyData = data.reduce((acc, entry) => {
+        const date = entry.Date;
+        const [month, day, year] = date.split('/');
+        const monthKey = `${year}-${month.padStart(2, '0')}-01`;
+        
+        if (!acc[monthKey]) {
+            acc[monthKey] = { Date: monthKey, ...entry };
+        }
+        return acc;
+    }, {});
+
+    const sortedMonthlyData = Object.values(monthlyData).sort((a, b) => a.Date.localeCompare(b.Date));
+    const dates = sortedMonthlyData.map(d => ({
         value: d.Date,
         label: moment(d.Date).format('MMMM YYYY')
     }));
 
-    // Populate account dropdown
     accountSelect.innerHTML = accounts.map(account => 
         `<option value="${account}">${account}</option>`
     ).join('');
 
-    // Populate month dropdowns
     const monthOptions = dates.map(date => 
         `<option value="${date.value}">${date.label}</option>`
     ).join('');
     monthSelect1.innerHTML = monthOptions;
     monthSelect2.innerHTML = monthOptions;
 
-    // Set default selections
     monthSelect2.selectedIndex = dates.length - 1;
     monthSelect1.selectedIndex = dates.length - 2;
 
-    // Add event listeners
     const updateComparison = () => {
         const account = accountSelect.value;
-        const month1Data = monthlyData.find(d => d.Date === monthSelect1.value);
-        const month2Data = monthlyData.find(d => d.Date === monthSelect2.value);
+        const month1Data = sortedMonthlyData.find(d => d.Date === monthSelect1.value);
+        const month2Data = sortedMonthlyData.find(d => d.Date === monthSelect2.value);
 
         if (month1Data && month2Data && month1Data[account] && month2Data[account]) {
             const followers1 = month1Data[account];
@@ -107,10 +102,13 @@ function setupWeekToWeekComparison(data) {
     const weekSelect2 = document.getElementById('weekSelect2');
 
     const accounts = Object.keys(data[0]).filter(key => key !== 'Date');
-    const dates = data.map(d => ({
-    value: d.Date,
-    label: moment(d.Date, 'MM/DD/YYYY', true).format('MMM D, YYYY')
-    }));
+    const dates = data.map(d => {
+        const [month, day, year] = d.Date.split('/');
+        return {
+            value: d.Date,
+            label: `${month}/${day}/${year}`
+        };
+    });
 
     weeklyAccountSelect.innerHTML = accounts.map(account => 
         `<option value="${account}">${account}</option>`
@@ -139,11 +137,11 @@ function setupWeekToWeekComparison(data) {
             document.getElementById('weekComparisonResult').innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="p-4 bg-white rounded-lg shadow">
-                        <h4 class="text-sm font-medium text-gray-500">${moment(weekSelect1.value, 'M/D/YYYY').format('MMM D, YYYY')}</h4>
+                        <h4 class="text-sm font-medium text-gray-500">${weekSelect1.value}</h4>
                         <p class="text-xl font-bold mt-1">${followers1.toLocaleString()}</p>
                     </div>
                     <div class="p-4 bg-white rounded-lg shadow">
-                        <h4 class="text-sm font-medium text-gray-500">${moment(weekSelect2.value, 'M/D/YYYY').format('MMM D, YYYY')}</h4>
+                        <h4 class="text-sm font-medium text-gray-500">${weekSelect2.value}</h4>
                         <p class="text-xl font-bold mt-1">${followers2.toLocaleString()}</p>
                     </div>
                     <div class="p-4 bg-white rounded-lg shadow">
@@ -168,28 +166,6 @@ function setupWeekToWeekComparison(data) {
     weekSelect2.addEventListener('change', updateWeekComparison);
 
     updateWeekComparison();
-}
-
-function aggregateMonthlyData(data) {
-    const monthlyData = {};
-    
-    data.forEach(entry => {
-        if (!entry.Date) return;
-        const parsedDate = moment(entry.Date, 'MM/DD/YYYY', true);
-        if (!parsedDate.isValid()) return;
-        
-        const monthKey = parsedDate.format('YYYY-MM-01');
-        if (!monthlyData[monthKey]) {
-            monthlyData[monthKey] = { Date: monthKey };
-            Object.keys(entry).forEach(key => {
-                if (key !== 'Date') {
-                    monthlyData[monthKey][key] = entry[key];
-                }
-            });
-        }
-    });
-
-    return Object.values(monthlyData).sort((a, b) => moment(a.Date).diff(moment(b.Date)));
 }
 
 function checkAuth() {
@@ -519,7 +495,7 @@ function updateMonthlyComparison(data) {
 function updateClientGrowthChart(data) {
     if (!data || !data.length) return;
     
-    const months = data.map(d => moment(d.Date, 'MM/DD/YYYY', true).format('MMM D, YYYY'));
+    const months = data.map(d => d.Date);
     const accounts = Object.keys(data[0]).filter(key => key !== 'Date');
     
     const series = accounts.map(account => ({
@@ -569,7 +545,7 @@ function updateClientGrowthChart(data) {
 function updateCompetitorGrowthChart(data) {
     if (!data || !data.length) return;
     
-    const months = data.map(d => moment(d.Date, 'MM/DD/YYYY', true).format('MMM D, YYYY'));
+    const months = data.map(d => d.Date);
     const competitors = Object.keys(data[0]).filter(key => key !== 'Date');
     
     const series = competitors.map(competitor => ({
