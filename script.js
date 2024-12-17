@@ -108,8 +108,8 @@ function setupWeekToWeekComparison(data) {
 
     const accounts = Object.keys(data[0]).filter(key => key !== 'Date');
     const dates = data.map(d => ({
-        value: d.Date,
-        label: moment(d.Date, 'M/D/YYYY').format('MMM D, YYYY')
+    value: d.Date,
+    label: moment(d.Date, 'MM/DD/YYYY', true).format('MMM D, YYYY')
     }));
 
     weeklyAccountSelect.innerHTML = accounts.map(account => 
@@ -174,7 +174,11 @@ function aggregateMonthlyData(data) {
     const monthlyData = {};
     
     data.forEach(entry => {
-        const monthKey = moment(entry.Date, 'M/D/YYYY').format('YYYY-MM-01');
+        if (!entry.Date) return;
+        const parsedDate = moment(entry.Date, 'MM/DD/YYYY', true);
+        if (!parsedDate.isValid()) return;
+        
+        const monthKey = parsedDate.format('YYYY-MM-01');
         if (!monthlyData[monthKey]) {
             monthlyData[monthKey] = { Date: monthKey };
             Object.keys(entry).forEach(key => {
@@ -515,7 +519,7 @@ function updateMonthlyComparison(data) {
 function updateClientGrowthChart(data) {
     if (!data || !data.length) return;
     
-    const months = data.map(d => moment(d.Date, 'M/D/YYYY').format('MMM D, YYYY'));
+    const months = data.map(d => moment(d.Date, 'MM/DD/YYYY', true).format('MMM D, YYYY'));
     const accounts = Object.keys(data[0]).filter(key => key !== 'Date');
     
     const series = accounts.map(account => ({
@@ -565,7 +569,7 @@ function updateClientGrowthChart(data) {
 function updateCompetitorGrowthChart(data) {
     if (!data || !data.length) return;
     
-    const months = data.map(d => moment(d.Date, 'M/D/YYYY').format('MMM D, YYYY'));
+    const months = data.map(d => moment(d.Date, 'MM/DD/YYYY', true).format('MMM D, YYYY'));
     const competitors = Object.keys(data[0]).filter(key => key !== 'Date');
     
     const series = competitors.map(competitor => ({
