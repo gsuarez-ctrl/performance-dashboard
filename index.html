@@ -104,6 +104,12 @@
                 <button id="clientsTab" class="nav-tab tab-active">
                     Client Accounts
                 </button>
+                <button id="weeklyTab" class="nav-tab">
+                    Weekly Performance
+                </button>
+                <button id="monthlyTab" class="nav-tab">
+                    Monthly Comparison
+                </button>
                 <button id="competitorsTab" class="nav-tab">
                     Competitor Analysis
                 </button>
@@ -149,33 +155,6 @@
                 </div>
             </div>
 
-            <!-- Month to Month Account Comparison -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold mb-4">Month to Month Account Comparison</h3>
-                <div class="flex flex-col md:flex-row gap-4 mb-6">
-                    <div class="flex-1">
-                        <label for="accountSelect" class="block text-sm font-medium text-gray-700 mb-1">Select Account</label>
-                        <select id="accountSelect" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                            <!-- Populated by JavaScript -->
-                        </select>
-                    </div>
-                    <div class="flex-1">
-                        <label for="monthSelect1" class="block text-sm font-medium text-gray-700 mb-1">First Month</label>
-                        <select id="monthSelect1" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                            <!-- Populated by JavaScript -->
-                        </select>
-                    </div>
-                    <div class="flex-1">
-                        <label for="monthSelect2" class="block text-sm font-medium text-gray-700 mb-1">Second Month</label>
-                        <select id="monthSelect2" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                            <!-- Populated by JavaScript -->
-                        </select>
-                    </div>
-                </div>
-                <div id="monthComparisonResult" class="mt-4 p-4 bg-gray-50 rounded-lg">
-                    <!-- Comparison results will be displayed here -->
-                </div>
-            </div>
 
             <!-- Monthly Performance Summary -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -233,6 +212,66 @@
                             <!-- Populated by JavaScript -->
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Performance View -->
+        <div id="weeklyView" class="space-y-8 hidden">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold mb-4">Week to Week Account Comparison</h3>
+                <div class="flex flex-col md:flex-row gap-4 mb-6">
+                    <div class="flex-1">
+                        <label for="weeklyAccountSelect" class="block text-sm font-medium text-gray-700 mb-1">Select Account</label>
+                        <select id="weeklyAccountSelect" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                            <!-- Populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label for="weekSelect1" class="block text-sm font-medium text-gray-700 mb-1">First Week</label>
+                        <select id="weekSelect1" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                            <!-- Populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label for="weekSelect2" class="block text-sm font-medium text-gray-700 mb-1">Second Week</label>
+                        <select id="weekSelect2" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                            <!-- Populated by JavaScript -->
+                        </select>
+                    </div>
+                </div>
+                <div id="weekComparisonResult" class="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <!-- Week comparison results will be displayed here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Comparison View -->
+        <div id="monthlyView" class="space-y-8 hidden">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold mb-4">Month to Month Account Comparison</h3>
+                <div class="flex flex-col md:flex-row gap-4 mb-6">
+                    <div class="flex-1">
+                        <label for="accountSelect" class="block text-sm font-medium text-gray-700 mb-1">Select Account</label>
+                        <select id="accountSelect" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                            <!-- Populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label for="monthSelect1" class="block text-sm font-medium text-gray-700 mb-1">First Month</label>
+                        <select id="monthSelect1" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                            <!-- Populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label for="monthSelect2" class="block text-sm font-medium text-gray-700 mb-1">Second Month</label>
+                        <select id="monthSelect2" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                            <!-- Populated by JavaScript -->
+                        </select>
+                    </div>
+                </div>
+                <div id="monthComparisonResult" class="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <!-- Month comparison results will be displayed here -->
                 </div>
             </div>
         </div>
