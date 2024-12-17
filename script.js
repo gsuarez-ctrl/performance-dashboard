@@ -292,16 +292,29 @@ function setupEventListeners() {
 }
 
 function switchTab(tab) {
-    ['clientsTab', 'weeklyTab', 'monthlyTab', 'competitorsTab'].forEach(tabId => {
-        document.getElementById(tabId).classList.remove('tab-active');
+    const tabs = {
+        clients: ['clientsTab', 'clientsView'],
+        weekly: ['weeklyTab', 'weeklyView'],
+        monthly: ['monthlyTab', 'monthlyView'],
+        competitors: ['competitorsTab', 'competitorsView']
+    };
+    
+    // Remove active class from all tabs and hide all views
+    Object.values(tabs).flat().forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            if (id.includes('Tab')) {
+                element.classList.remove('tab-active');
+            } else {
+                element.classList.add('hidden');
+            }
+        }
     });
     
-    ['clientsView', 'weeklyView', 'monthlyView', 'competitorsView'].forEach(viewId => {
-        document.getElementById(viewId).classList.add('hidden');
-    });
-    
-    document.getElementById(`${tab}Tab`).classList.add('tab-active');
-    document.getElementById(`${tab}View`).classList.remove('hidden');
+    // Activate selected tab and view
+    const [tabId, viewId] = tabs[tab];
+    document.getElementById(tabId).classList.add('tab-active');
+    document.getElementById(viewId).classList.remove('hidden');
     
     resizeCharts();
 }
