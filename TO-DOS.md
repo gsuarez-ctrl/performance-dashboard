@@ -1,9 +1,9 @@
 - data fetching on monday - instagram tracker -- DONE
-- month to month comparison in the clients tab, in a new tab -- 
+- month to month comparison in the clients tab, in a new tab -- DONE
 - best performer and worst performer on the top, should say the exact date the snapshot was taken.
 - Growth Comparison, Performance History OUT -- DONE
 - Historical Performance Summary instead of that it should show a table with each account and columns: Account name Oct followers Nov followers Dec followers Avg Growth (always in followers number, not in %) --- 
 - Competitors - Market Share Trend OUT -- 
-- Monthly growth -- exact number of followers, not % growth ---
-- Adding a tab for clients to show weekly performance, based on the data we're gonna collect. --- 
+- Monthly growth -- exact number of followers, not % growth --- DONE
+- Adding a tab for clients to show weekly performance, based on the data we're gonna collect. --- DONE
 - 
