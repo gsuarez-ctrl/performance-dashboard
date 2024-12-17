@@ -19,21 +19,30 @@ function setupMonthToMonthComparison(data) {
     const monthSelect2 = document.getElementById('monthSelect2');
 
     const accounts = Object.keys(data[0]).filter(key => key !== 'Date');
+    
+    // Group by month and keep latest data for each month
     const monthlyData = data.reduce((acc, entry) => {
-        const date = entry.Date;
-        const [month, day, year] = date.split('/');
-        const monthKey = `${year}-${month.padStart(2, '0')}-01`;
+        if (!entry || !entry.Date) return acc;
         
-        if (!acc[monthKey]) {
-            acc[monthKey] = { Date: monthKey, ...entry };
+        try {
+            const [month, day, year] = entry.Date.split('/');
+            const monthKey = `${year}-${month.padStart(2, '0')}-01`;
+            
+            // Only update if we don't have this month yet, or if it's a later date in the same month
+            if (!acc[monthKey] || (entry.Date > acc[monthKey].Date)) {
+                acc[monthKey] = { ...entry };
+            }
+            return acc;
+        } catch (e) {
+            console.error('Error processing date:', entry.Date);
+            return acc;
         }
-        return acc;
     }, {});
 
-    const sortedMonthlyData = Object.values(monthlyData).sort((a, b) => a.Date.localeCompare(b.Date));
+    const sortedMonthlyData = Object.values(monthlyData).sort((a, b) => moment(a.Date).diff(moment(b.Date)));
     const dates = sortedMonthlyData.map(d => ({
         value: d.Date,
-        label: moment(d.Date).format('MMMM YYYY')
+        label: moment(d.Date, 'M/D/YYYY').format('MMMM YYYY')
     }));
 
     accountSelect.innerHTML = accounts.map(account => 
@@ -63,11 +72,11 @@ function setupMonthToMonthComparison(data) {
             document.getElementById('monthComparisonResult').innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="p-4 bg-white rounded-lg shadow">
-                        <h4 class="text-sm font-medium text-gray-500">${moment(monthSelect1.value).format('MMMM YYYY')}</h4>
+                        <h4 class="text-sm font-medium text-gray-500">${moment(monthSelect1.value, 'M/D/YYYY').format('MMMM YYYY')}</h4>
                         <p class="text-xl font-bold mt-1">${followers1.toLocaleString()}</p>
                     </div>
                     <div class="p-4 bg-white rounded-lg shadow">
-                        <h4 class="text-sm font-medium text-gray-500">${moment(monthSelect2.value).format('MMMM YYYY')}</h4>
+                        <h4 class="text-sm font-medium text-gray-500">${moment(monthSelect2.value, 'M/D/YYYY').format('MMMM YYYY')}</h4>
                         <p class="text-xl font-bold mt-1">${followers2.toLocaleString()}</p>
                     </div>
                     <div class="p-4 bg-white rounded-lg shadow">
@@ -102,13 +111,10 @@ function setupWeekToWeekComparison(data) {
     const weekSelect2 = document.getElementById('weekSelect2');
 
     const accounts = Object.keys(data[0]).filter(key => key !== 'Date');
-    const dates = data.map(d => {
-        const [month, day, year] = d.Date.split('/');
-        return {
-            value: d.Date,
-            label: `${month}/${day}/${year}`
-        };
-    });
+    const dates = data.map(d => ({
+        value: d.Date,
+        label: d.Date
+    }));
 
     weeklyAccountSelect.innerHTML = accounts.map(account => 
         `<option value="${account}">${account}</option>`
