@@ -15,11 +15,10 @@ function setupMonthToMonthComparison(data) {
     const monthSelect1 = document.getElementById('monthSelect1');
     const monthSelect2 = document.getElementById('monthSelect2');
 
-    // Filter out the first entry (which has null values) and get accounts
     const accounts = Object.keys(data[1]).filter(key => key !== 'Date');
-    const monthlyData = data.filter(entry => entry.Date); // Skip the first null entry
+    const filteredData = data.filter(entry => entry.Date);
 
-    const dates = monthlyData.map(d => ({
+    const dates = filteredData.map(d => ({
         value: d.Date,
         label: moment(d.Date, 'M/D/YYYY').format('MMMM YYYY')
     }));
@@ -39,8 +38,8 @@ function setupMonthToMonthComparison(data) {
 
     const updateComparison = () => {
         const account = accountSelect.value;
-        const month1Data = monthlyData.find(d => d.Date === monthSelect1.value);
-        const month2Data = monthlyData.find(d => d.Date === monthSelect2.value);
+        const month1Data = filteredData.find(d => d.Date === monthSelect1.value);
+        const month2Data = filteredData.find(d => d.Date === monthSelect2.value);
 
         if (month1Data && month2Data && account in month1Data && account in month2Data) {
             const followers1 = month1Data[account];
@@ -92,9 +91,9 @@ function setupWeekToWeekComparison(data) {
     const weekSelect2 = document.getElementById('weekSelect2');
 
     const accounts = Object.keys(data[1]).filter(key => key !== 'Date');
-    const weeklyData = data.filter(entry => entry.Date);
+    const filteredData = data.filter(entry => entry.Date);
 
-    const dates = weeklyData.map(d => ({
+    const dates = filteredData.map(d => ({
         value: d.Date,
         label: d.Date
     }));
@@ -114,8 +113,8 @@ function setupWeekToWeekComparison(data) {
 
     const updateWeekComparison = () => {
         const account = weeklyAccountSelect.value;
-        const week1Data = weeklyData.find(d => d.Date === weekSelect1.value);
-        const week2Data = weeklyData.find(d => d.Date === weekSelect2.value);
+        const week1Data = filteredData.find(d => d.Date === weekSelect1.value);
+        const week2Data = filteredData.find(d => d.Date === weekSelect2.value);
 
         if (week1Data && week2Data && account in week1Data && account in week2Data) {
             const followers1 = week1Data[account];
@@ -324,6 +323,7 @@ function updateClientDashboard(data) {
         updateClientGrowthChart(data.data);
         updateMonthlyComparison(data);
         updateMonthlySummary(data);
+        updateMonthlyFollowersTable(data.data);
     }
 }
 
@@ -367,6 +367,55 @@ function updateIndividualScorecards(data) {
                     </div>
                 </div>
             </div>
+        `;
+    }).join('');
+}
+
+function updateMonthlyFollowersTable(data) {
+    if (!data || data.length < 2) return;
+
+    const accounts = Object.keys(data[1]).filter(key => key !== 'Date');
+    const monthlyData = {};
+
+    // Group data by month
+    data.forEach(entry => {
+        if (!entry.Date) return;
+        const month = moment(entry.Date, 'M/D/YYYY').format('MMM');
+        if (!monthlyData[month]) {
+            monthlyData[month] = entry;
+        } else {
+            const currentDate = moment(entry.Date, 'M/D/YYYY');
+            const existingDate = moment(monthlyData[month].Date, 'M/D/YYYY');
+            if (currentDate.isAfter(existingDate)) {
+                monthlyData[month] = entry;
+            }
+        }
+    });
+
+    const tableBody = document.getElementById('monthlyFollowersTable').querySelector('tbody');
+    const months = ['Oct', 'Nov', 'Dec'];
+
+    tableBody.innerHTML = accounts.map(account => {
+        const values = months.map(month => monthlyData[month]?.[account]);
+        const firstValue = values.find(v => v !== null && v !== undefined);
+        const lastValue = [...values].reverse().find(v => v !== null && v !== undefined);
+        
+        let avgGrowth = 0;
+        if (firstValue && lastValue) {
+            const validValues = values.filter(v => v !== null && v !== undefined);
+            avgGrowth = Math.round((lastValue - firstValue) / (validValues.length - 1));
+        }
+
+        return `
+            <tr>
+                <td class="px-6 py-4 whitespace-nowrap">${account}</td>
+                ${months.map(month => `
+                    <td class="px-6 py-4">${monthlyData[month]?.[account]?.toLocaleString() || '-'}</td>
+                `).join('')}
+                <td class="px-6 py-4 ${avgGrowth >= 0 ? 'text-green-600' : 'text-red-600'}">
+                    ${avgGrowth !== 0 ? (avgGrowth >= 0 ? '+' : '') + avgGrowth.toLocaleString() : '-'}
+                </td>
+            </tr>
         `;
     }).join('');
 }
@@ -416,6 +465,36 @@ function updateMonthlySummary(data) {
             </p>
         `;
     }
+}
+
+function updatePerformerCard(elementId, performer, history = null) {
+    const element = document.getElementById(elementId);
+    if (!element || !performer) return;
+    
+    const historyCount = history ? history[performer.account] || 0 : null;
+    const followerChange = performer.currentFollowers - (performer.previousFollowers || 0);
+    
+    element.innerHTML = `
+        <p class="text-2xl font-bold">${performer.account}</p>
+        <p class="text-gray-600">Date Range: 
+            <span class="font-medium">Oct 1 - Dec 11, 2024</span>
+        </p>
+        <p class="text-gray-600">Growth: 
+            <span class="${performer.growth >= 0 ? 'text-green-500' : 'text-red-500'}">
+                ${performer.growth > 0 ? '+' : ''}${performer.growth.toFixed(2)}%
+                (${followerChange >= 0 ? '+' : ''}${followerChange.toLocaleString()} followers)
+            </span>
+        </p>
+        ${history !== null ? `
+            <p class="text-sm text-gray-500">
+                ${elementId.includes('best') ? 'Times as best performer: ' : 'Times needing attention: '}
+                ${historyCount}
+            </p>
+        ` : ''}
+        <div class="mt-2 text-sm text-gray-500">
+            <p>Current Followers: <span class="font-medium">${performer.currentFollowers.toLocaleString()}</span></p>
+        </div>
+    `;
 }
 
 function updateCompetitorDashboard(data) {
@@ -558,7 +637,15 @@ function updateCompetitorGrowthChart(data) {
 
     const option = {
         tooltip: {
-            trigger: 'axis'
+            trigger: 'axis',
+            formatter: function(params) {
+                return params.reduce((acc, param) => {
+                    if (param.value !== null) {
+                        return acc + `${param.seriesName}: ${param.value.toFixed(2)}%<br>`;
+                    }
+                    return acc;
+                }, `${params[0].axisValue}<br>`);
+            }
         },
         legend: {
             type: 'scroll',
@@ -582,31 +669,6 @@ function updateCompetitorGrowthChart(data) {
     };
 
     charts.competitorGrowth.setOption(option);
-}
-
-function updatePerformerCard(elementId, performer, history = null) {
-    const element = document.getElementById(elementId);
-    if (!element || !performer) return;
-    
-    const historyCount = history ? history[performer.account] || 0 : null;
-    
-    element.innerHTML = `
-        <p class="text-2xl font-bold">${performer.account}</p>
-        <p class="text-gray-600">Growth: 
-            <span class="${performer.growth >= 0 ? 'text-green-500' : 'text-red-500'}">
-                ${performer.growth > 0 ? '+' : ''}${performer.growth.toFixed(2)}%
-            </span>
-        </p>
-        ${history !== null ? `
-            <p class="text-sm text-gray-500">
-                ${elementId.includes('best') ? 'Times as best performer: ' : 'Times needing attention: '}
-                ${historyCount}
-            </p>
-        ` : ''}
-        <div class="mt-2 text-sm text-gray-500">
-            <p>Current Followers: <span class="font-medium">${performer.currentFollowers.toLocaleString()}</span></p>
-        </div>
-    `;
 }
 
 function updateCompetitorComparisonTable(data) {
@@ -658,18 +720,18 @@ function exportData() {
     };
     
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `social_media_analytics_${exportData.timestamp}.json`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
+   const url = window.URL.createObjectURL(blob);
+   const a = document.createElement('a');
+   a.href = url;
+   a.download = `social_media_analytics_${exportData.timestamp}.json`;
+   document.body.appendChild(a);
+   a.click();
+   window.URL.revokeObjectURL(url);
+   document.body.removeChild(a);
 }
 
 // Initialize dashboard when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('loginForm').addEventListener('submit', handleLogin);
-    checkAuth();
+   document.getElementById('loginForm').addEventListener('submit', handleLogin);
+   checkAuth();
 });
