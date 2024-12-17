@@ -40,6 +40,13 @@
         .nav-tab:hover {
             background-color: #F3F4F6;
         }
+        select {
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            border: 1px solid #D1D5DB;
+            width: 100%;
+            max-width: 20rem;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -142,7 +149,35 @@
                 </div>
             </div>
 
-            <!-- Monthly Performance Summary and Comparison -->
+            <!-- Month to Month Account Comparison -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold mb-4">Month to Month Account Comparison</h3>
+                <div class="flex flex-col md:flex-row gap-4 mb-6">
+                    <div class="flex-1">
+                        <label for="accountSelect" class="block text-sm font-medium text-gray-700 mb-1">Select Account</label>
+                        <select id="accountSelect" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                            <!-- Populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label for="monthSelect1" class="block text-sm font-medium text-gray-700 mb-1">First Month</label>
+                        <select id="monthSelect1" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                            <!-- Populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label for="monthSelect2" class="block text-sm font-medium text-gray-700 mb-1">Second Month</label>
+                        <select id="monthSelect2" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                            <!-- Populated by JavaScript -->
+                        </select>
+                    </div>
+                </div>
+                <div id="monthComparisonResult" class="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <!-- Comparison results will be displayed here -->
+                </div>
+            </div>
+
+            <!-- Monthly Performance Summary -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Monthly Summary -->
                 <div class="bg-white rounded-lg shadow p-6">
