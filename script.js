@@ -5,10 +5,10 @@ let currentData = null;
 
 // Initialize charts with null values
 let charts = {
-    clientGrowth: null,
-    competitorGrowth: null,
-    competitorMarket: null,
-    monthlyComparison: null
+    clientGrowthChart: null,
+    clientPerformanceChart: null,
+    competitorGrowthChart: null,
+    competitorMarketShare: null
 };
 
 // Parse date helper function
@@ -122,7 +122,7 @@ function setupEventListeners() {
     
     // Window resize handling
     const resizeHandler = debounce(() => {
-        Object.values(charts).forEach(chart => chart?.resize());
+        resizeCharts();
     }, 250);
     
     window.addEventListener('resize', resizeHandler);
@@ -146,14 +146,39 @@ function switchTab(tab) {
 }
 
 function initializeCharts() {
-    charts.clientGrowth = echarts.init(document.getElementById('clientGrowthChart'));
-    charts.competitorGrowth = echarts.init(document.getElementById('competitorGrowthChart'));
-    charts.competitorMarket = echarts.init(document.getElementById('competitorMarketChart'));
-    charts.monthlyComparison = echarts.init(document.getElementById('monthlyComparisonChart'));
+    try {
+        // Safely initialize each chart only if its container exists
+        const chartContainers = {
+            clientGrowthChart: 'clientGrowthChart',
+            clientPerformanceChart: 'clientPerformanceHistory',
+            competitorGrowthChart: 'competitorGrowthChart',
+            competitorMarketShare: 'competitorMarketShare'
+        };
+
+        Object.entries(chartContainers).forEach(([chartKey, containerId]) => {
+            const container = document.getElementById(containerId);
+            if (container) {
+                charts[chartKey] = echarts.init(container);
+            } else {
+                console.warn(`Chart container ${containerId} not found`);
+                charts[chartKey] = null;
+            }
+        });
+    } catch (error) {
+        console.error('Error initializing charts:', error);
+    }
 }
 
 function resizeCharts() {
-    Object.values(charts).forEach(chart => chart?.resize());
+    Object.values(charts).forEach(chart => {
+        if (chart) {
+            try {
+                chart.resize();
+            } catch (error) {
+                console.warn('Error resizing chart:', error);
+            }
+        }
+    });
 }
 
 function updateDashboard() {
