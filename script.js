@@ -1,15 +1,12 @@
 // Authentication
 const CORRECT_PASSWORD = 'PalasseDigital';
 let isAuthenticated = false;
-
-// Initialize charts
+let currentData = null;
 let charts = {
     clientGrowth: null,
     monthlyComparison: null,
     competitorGrowth: null
 };
-
-let currentData = null;
 
 function setupMonthToMonthComparison(data) {
     if (!data || data.length < 2) return;
@@ -18,29 +15,11 @@ function setupMonthToMonthComparison(data) {
     const monthSelect1 = document.getElementById('monthSelect1');
     const monthSelect2 = document.getElementById('monthSelect2');
 
-    const accounts = Object.keys(data[0]).filter(key => key !== 'Date');
-    
-    // Group by month and keep latest data for each month
-    const monthlyData = data.reduce((acc, entry) => {
-        if (!entry || !entry.Date) return acc;
-        
-        try {
-            const [month, day, year] = entry.Date.split('/');
-            const monthKey = `${year}-${month.padStart(2, '0')}-01`;
-            
-            // Only update if we don't have this month yet, or if it's a later date in the same month
-            if (!acc[monthKey] || (entry.Date > acc[monthKey].Date)) {
-                acc[monthKey] = { ...entry };
-            }
-            return acc;
-        } catch (e) {
-            console.error('Error processing date:', entry.Date);
-            return acc;
-        }
-    }, {});
+    // Filter out the first entry (which has null values) and get accounts
+    const accounts = Object.keys(data[1]).filter(key => key !== 'Date');
+    const monthlyData = data.filter(entry => entry.Date); // Skip the first null entry
 
-    const sortedMonthlyData = Object.values(monthlyData).sort((a, b) => moment(a.Date).diff(moment(b.Date)));
-    const dates = sortedMonthlyData.map(d => ({
+    const dates = monthlyData.map(d => ({
         value: d.Date,
         label: moment(d.Date, 'M/D/YYYY').format('MMMM YYYY')
     }));
@@ -60,23 +39,25 @@ function setupMonthToMonthComparison(data) {
 
     const updateComparison = () => {
         const account = accountSelect.value;
-        const month1Data = sortedMonthlyData.find(d => d.Date === monthSelect1.value);
-        const month2Data = sortedMonthlyData.find(d => d.Date === monthSelect2.value);
+        const month1Data = monthlyData.find(d => d.Date === monthSelect1.value);
+        const month2Data = monthlyData.find(d => d.Date === monthSelect2.value);
 
-        if (month1Data && month2Data && month1Data[account] && month2Data[account]) {
+        if (month1Data && month2Data && account in month1Data && account in month2Data) {
             const followers1 = month1Data[account];
             const followers2 = month2Data[account];
+            if (followers1 === null || followers2 === null) return;
+
             const difference = followers2 - followers1;
             const growth = ((followers2 - followers1) / followers1) * 100;
 
             document.getElementById('monthComparisonResult').innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="p-4 bg-white rounded-lg shadow">
-                        <h4 class="text-sm font-medium text-gray-500">${moment(monthSelect1.value, 'M/D/YYYY').format('MMMM YYYY')}</h4>
+                        <h4 class="text-sm font-medium text-gray-500">${month1Data.Date}</h4>
                         <p class="text-xl font-bold mt-1">${followers1.toLocaleString()}</p>
                     </div>
                     <div class="p-4 bg-white rounded-lg shadow">
-                        <h4 class="text-sm font-medium text-gray-500">${moment(monthSelect2.value, 'M/D/YYYY').format('MMMM YYYY')}</h4>
+                        <h4 class="text-sm font-medium text-gray-500">${month2Data.Date}</h4>
                         <p class="text-xl font-bold mt-1">${followers2.toLocaleString()}</p>
                     </div>
                     <div class="p-4 bg-white rounded-lg shadow">
@@ -110,8 +91,10 @@ function setupWeekToWeekComparison(data) {
     const weekSelect1 = document.getElementById('weekSelect1');
     const weekSelect2 = document.getElementById('weekSelect2');
 
-    const accounts = Object.keys(data[0]).filter(key => key !== 'Date');
-    const dates = data.map(d => ({
+    const accounts = Object.keys(data[1]).filter(key => key !== 'Date');
+    const weeklyData = data.filter(entry => entry.Date);
+
+    const dates = weeklyData.map(d => ({
         value: d.Date,
         label: d.Date
     }));
@@ -131,23 +114,25 @@ function setupWeekToWeekComparison(data) {
 
     const updateWeekComparison = () => {
         const account = weeklyAccountSelect.value;
-        const week1Data = data.find(d => d.Date === weekSelect1.value);
-        const week2Data = data.find(d => d.Date === weekSelect2.value);
+        const week1Data = weeklyData.find(d => d.Date === weekSelect1.value);
+        const week2Data = weeklyData.find(d => d.Date === weekSelect2.value);
 
-        if (week1Data && week2Data && week1Data[account] && week2Data[account]) {
+        if (week1Data && week2Data && account in week1Data && account in week2Data) {
             const followers1 = week1Data[account];
             const followers2 = week2Data[account];
+            if (followers1 === null || followers2 === null) return;
+
             const difference = followers2 - followers1;
             const growth = ((followers2 - followers1) / followers1) * 100;
 
             document.getElementById('weekComparisonResult').innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="p-4 bg-white rounded-lg shadow">
-                        <h4 class="text-sm font-medium text-gray-500">${weekSelect1.value}</h4>
+                        <h4 class="text-sm font-medium text-gray-500">${week1Data.Date}</h4>
                         <p class="text-xl font-bold mt-1">${followers1.toLocaleString()}</p>
                     </div>
                     <div class="p-4 bg-white rounded-lg shadow">
-                        <h4 class="text-sm font-medium text-gray-500">${weekSelect2.value}</h4>
+                        <h4 class="text-sm font-medium text-gray-500">${week2Data.Date}</h4>
                         <p class="text-xl font-bold mt-1">${followers2.toLocaleString()}</p>
                     </div>
                     <div class="p-4 bg-white rounded-lg shadow">
@@ -346,13 +331,15 @@ function updateIndividualScorecards(data) {
     if (!data?.data || !data.data.length) return;
     
     const container = document.getElementById('individualScorecardsContainer');
-    const accounts = Object.keys(data.data[0]).filter(key => key !== 'Date');
+    const accounts = Object.keys(data.data[1]).filter(key => key !== 'Date');
     const latestData = data.data[data.data.length - 1];
     const previousData = data.data[data.data.length - 2];
     
     container.innerHTML = accounts.map(account => {
         const currentValue = latestData[account];
         const previousValue = previousData[account];
+        if (currentValue === null || previousValue === null) return '';
+        
         const followerDifference = currentValue - previousValue;
         const growth = ((currentValue - previousValue) / previousValue) * 100;
         const timesBest = data.performanceHistory.bestPerformer[account] || 0;
@@ -393,39 +380,42 @@ function updateMonthlySummary(data) {
     const growthData = accounts.map(account => {
         const currentValue = lastTwoMonths[1][account];
         const previousValue = lastTwoMonths[0][account];
+        if (currentValue === null || previousValue === null) return null;
         const growth = ((currentValue - previousValue) / previousValue) * 100;
         return { account, growth, currentValue, previousValue };
-    });
+    }).filter(item => item !== null);
 
     growthData.sort((a, b) => b.growth - a.growth);
 
-    const mostImproved = growthData[0];
-    document.getElementById('mostImproved').innerHTML = `
-        <p class="font-medium">${mostImproved.account}</p>
-        <p class="text-green-500">+${mostImproved.growth.toFixed(2)}%</p>
-        <p class="text-sm text-gray-500">${mostImproved.currentValue.toLocaleString()} followers</p>
-    `;
+    if (growthData.length > 0) {
+        const mostImproved = growthData[0];
+        document.getElementById('mostImproved').innerHTML = `
+            <p class="font-medium">${mostImproved.account}</p>
+            <p class="text-green-500">+${mostImproved.growth.toFixed(2)}%</p>
+            <p class="text-sm text-gray-500">${mostImproved.currentValue.toLocaleString()} followers</p>
+        `;
 
-    const needsFocus = growthData[growthData.length - 1];
-    document.getElementById('needsFocus').innerHTML = `
-        <p class="font-medium">${needsFocus.account}</p>
-        <p class="text-red-500">${needsFocus.growth.toFixed(2)}%</p>
-        <p class="text-sm text-gray-500">${needsFocus.currentValue.toLocaleString()} followers</p>
-    `;
+        const needsFocus = growthData[growthData.length - 1];
+        document.getElementById('needsFocus').innerHTML = `
+            <p class="font-medium">${needsFocus.account}</p>
+            <p class="text-red-500">${needsFocus.growth.toFixed(2)}%</p>
+            <p class="text-sm text-gray-500">${needsFocus.currentValue.toLocaleString()} followers</p>
+        `;
 
-    const totalPrevious = growthData.reduce((sum, item) => sum + item.previousValue, 0);
-    const totalCurrent = growthData.reduce((sum, item) => sum + item.currentValue, 0);
-    const overallGrowth = ((totalCurrent - totalPrevious) / totalPrevious) * 100;
-    
-    document.getElementById('overallGrowth').innerHTML = `
-        <p class="font-medium">All Accounts</p>
-        <p class="${overallGrowth >= 0 ? 'text-green-500' : 'text-red-500'}">
-            ${overallGrowth > 0 ? '+' : ''}${overallGrowth.toFixed(2)}%
-        </p>
-        <p class="text-sm text-gray-500">
-            ${totalCurrent.toLocaleString()} total followers
-        </p>
-    `;
+        const totalPrevious = growthData.reduce((sum, item) => sum + item.previousValue, 0);
+        const totalCurrent = growthData.reduce((sum, item) => sum + item.currentValue, 0);
+        const overallGrowth = ((totalCurrent - totalPrevious) / totalPrevious) * 100;
+        
+        document.getElementById('overallGrowth').innerHTML = `
+            <p class="font-medium">All Accounts</p>
+            <p class="${overallGrowth >= 0 ? 'text-green-500' : 'text-red-500'}">
+                ${overallGrowth > 0 ? '+' : ''}${overallGrowth.toFixed(2)}%
+            </p>
+            <p class="text-sm text-gray-500">
+                ${totalCurrent.toLocaleString()} total followers
+            </p>
+        `;
+    }
 }
 
 function updateCompetitorDashboard(data) {
@@ -442,15 +432,16 @@ function updateCompetitorDashboard(data) {
 function updateMonthlyComparison(data) {
     if (!data?.data || data.data.length < 2) return;
     
-    const accounts = Object.keys(data.data[0]).filter(key => key !== 'Date');
     const lastTwoMonths = data.data.slice(-2);
+    const accounts = Object.keys(lastTwoMonths[0]).filter(key => key !== 'Date');
     
     const growthData = accounts.map(account => {
         const currentValue = lastTwoMonths[1][account];
         const previousValue = lastTwoMonths[0][account];
+        if (currentValue === null || previousValue === null) return null;
         const growth = ((currentValue - previousValue) / previousValue) * 100;
         return { account, growth };
-    });
+    }).filter(item => item !== null);
 
     growthData.sort((a, b) => b.growth - a.growth);
 
@@ -501,29 +492,33 @@ function updateMonthlyComparison(data) {
 function updateClientGrowthChart(data) {
     if (!data || !data.length) return;
     
-    const months = data.map(d => d.Date);
-    const accounts = Object.keys(data[0]).filter(key => key !== 'Date');
+    const filteredData = data.filter(entry => entry.Date);
+    const months = filteredData.map(d => d.Date);
+    const accounts = Object.keys(filteredData[0]).filter(key => key !== 'Date');
     
     const series = accounts.map(account => ({
         name: account,
         type: 'line',
-        data: calculateGrowthRates(data, account),
+        data: calculateGrowthRates(filteredData, account),
         smooth: true
-    }));
+    })).filter(series => series.data.some(val => val !== null));
 
     const option = {
         tooltip: {
             trigger: 'axis',
             formatter: function(params) {
                 return params.reduce((acc, param) => {
-                    return acc + `${param.seriesName}: ${param.value.toFixed(2)}%<br>`;
+                    if (param.value !== null) {
+                        return acc + `${param.seriesName}: ${param.value.toFixed(2)}%<br>`;
+                    }
+                    return acc;
                 }, `${params[0].axisValue}<br>`);
             }
         },
         legend: {
             type: 'scroll',
             bottom: 0,
-            data: accounts
+            data: series.map(s => s.name)
         },
         grid: {
             left: '3%',
@@ -642,14 +637,17 @@ function updateCompetitorComparisonTable(data) {
 function calculateGrowthRates(data, account) {
     return data.map((current, index) => {
         if (index === 0) return 0;
-        const previous = data[index - 1][account];
-        return ((current[account] - previous) / previous) * 100;
+        const currentValue = current[account];
+        const previousValue = data[index - 1][account];
+        if (currentValue === null || previousValue === null) return null;
+        return ((currentValue - previousValue) / previousValue) * 100;
     });
 }
 
 function calculateGrowthRate(data, account) {
     const current = data[data.length - 1][account];
     const previous = data[data.length - 2][account];
+    if (current === null || previous === null) return 0;
     return ((current - previous) / previous) * 100;
 }
 
