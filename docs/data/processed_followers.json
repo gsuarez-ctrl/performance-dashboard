@@ -17,7 +17,8 @@
         "200e20th": null,
         "williamsburgwharf": null,
         "westwharfbk": null,
-        "aspromisedmag": null
+        "aspromisedmag": null,
+        "olympia_dumbo": null
       },
       {
         "Date": "10/1/2024",
@@ -36,7 +37,8 @@
         "200e20th": 2418,
         "williamsburgwharf": 1101,
         "westwharfbk": 1606,
-        "aspromisedmag": null
+        "aspromisedmag": null,
+        "olympia_dumbo": null
       },
       {
         "Date": "10/9/2024",
@@ -55,7 +57,8 @@
         "200e20th": 2442,
         "williamsburgwharf": 1137,
         "westwharfbk": 1621,
-        "aspromisedmag": null
+        "aspromisedmag": null,
+        "olympia_dumbo": null
       },
       {
         "Date": "10/16/2024",
@@ -74,7 +77,8 @@
         "200e20th": 2467,
         "williamsburgwharf": 1166,
         "westwharfbk": 1633,
-        "aspromisedmag": null
+        "aspromisedmag": null,
+        "olympia_dumbo": null
       },
       {
         "Date": "10/23/2024",
@@ -93,7 +97,8 @@
         "200e20th": 2519,
         "williamsburgwharf": 1194,
         "westwharfbk": 1639,
-        "aspromisedmag": null
+        "aspromisedmag": null,
+        "olympia_dumbo": null
       },
       {
         "Date": "10/30/2024",
@@ -112,7 +117,8 @@
         "200e20th": 2535,
         "williamsburgwharf": 1217,
         "westwharfbk": 1669,
-        "aspromisedmag": null
+        "aspromisedmag": null,
+        "olympia_dumbo": null
       },
       {
         "Date": "11/1/2024",
@@ -131,7 +137,8 @@
         "200e20th": 2537,
         "williamsburgwharf": 1229,
         "westwharfbk": 1673,
-        "aspromisedmag": null
+        "aspromisedmag": null,
+        "olympia_dumbo": null
       },
       {
         "Date": "11/6/2024",
@@ -150,7 +157,8 @@
         "200e20th": 2560,
         "williamsburgwharf": 1258,
         "westwharfbk": 1676,
-        "aspromisedmag": null
+        "aspromisedmag": null,
+        "olympia_dumbo": null
       },
       {
         "Date": "11/14/2024",
@@ -169,7 +177,8 @@
         "200e20th": 2578,
         "williamsburgwharf": 1289,
         "westwharfbk": 1689,
-        "aspromisedmag": 4654
+        "aspromisedmag": 4654,
+        "olympia_dumbo": null
       },
       {
         "Date": "11/20/2024",
@@ -188,7 +197,8 @@
         "200e20th": 2597,
         "williamsburgwharf": 1321,
         "westwharfbk": 1695,
-        "aspromisedmag": 4724
+        "aspromisedmag": 4724,
+        "olympia_dumbo": null
       },
       {
         "Date": "11/27/2024",
@@ -207,7 +217,8 @@
         "200e20th": 2600,
         "williamsburgwharf": 1396,
         "westwharfbk": 1701,
-        "aspromisedmag": 4775
+        "aspromisedmag": 4775,
+        "olympia_dumbo": null
       },
       {
         "Date": "12/2/2024",
@@ -226,7 +237,8 @@
         "200e20th": 2599,
         "williamsburgwharf": 1398,
         "westwharfbk": 1699,
-        "aspromisedmag": 4799
+        "aspromisedmag": 4799,
+        "olympia_dumbo": null
       },
       {
         "Date": "12/11/2024",
@@ -245,7 +257,8 @@
         "200e20th": 2598,
         "williamsburgwharf": 1420,
         "westwharfbk": 1736,
-        "aspromisedmag": 4853
+        "aspromisedmag": 4853,
+        "olympia_dumbo": null
       },
       {
         "Date": "2024-12-23 9:20:36",
@@ -264,7 +277,8 @@
         "200e20th": 2579,
         "williamsburgwharf": 1493,
         "westwharfbk": 1766,
-        "aspromisedmag": 5001
+        "aspromisedmag": 5001,
+        "olympia_dumbo": 7760
       },
       {
         "Date": "2024-12-30 9:20:29",
@@ -283,7 +297,8 @@
         "200e20th": 2574,
         "williamsburgwharf": 1549,
         "westwharfbk": 1767,
-        "aspromisedmag": 5070
+        "aspromisedmag": 5070,
+        "olympia_dumbo": 7814
       },
       {
         "Date": "2025-01-06 9:21:26",
@@ -302,7 +317,8 @@
         "200e20th": 2809,
         "williamsburgwharf": 1563,
         "westwharfbk": 2121,
-        "aspromisedmag": 5106
+        "aspromisedmag": 5106,
+        "olympia_dumbo": 7822
       }
     ],
     "performers": {
@@ -411,5 +427,5 @@
       }
     }
   },
-  "lastUpdated": "2025-01-08T12:32:53.258Z"
+  "lastUpdated": "2025-01-09T12:32:52.461Z"
 }
