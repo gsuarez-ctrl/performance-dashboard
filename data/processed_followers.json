@@ -379,18 +379,38 @@
         "westwharfbk": 2133,
         "aspromisedmag": 5132,
         "olympia_dumbo": 7854
+      },
+      {
+        "Date": "2025-02-03 9:21:19",
+        "reddymadedesign": 18669,
+        "rottetcollection": 32032,
+        "lrottet": 74194,
+        "rottetstudio": 18850,
+        "StudioCAHS": 21971,
+        "caterinahstewart": 9717,
+        "lucreziabuccellati": 23625,
+        "lindsaybartonbarrett": 4843,
+        "forddrive": 4016,
+        "alfredoparedesstudio": 50140,
+        "bobbyanspachstudiosfoundation": 8387,
+        "liveone38": 2413,
+        "200e20th": 3159,
+        "williamsburgwharf": 1676,
+        "westwharfbk": 2156,
+        "aspromisedmag": 5156,
+        "olympia_dumbo": 7916
       }
     ],
     "performers": {
       "best": {
-        "account": "200e20th",
-        "growth": 11.790079079798705,
-        "currentFollowers": 3110
+        "account": "lucreziabuccellati",
+        "growth": 7.381482659879096,
+        "currentFollowers": 23625
       },
       "worst": {
-        "account": "bobbyanspachstudiosfoundation",
-        "growth": -0.2732565046928835,
-        "currentFollowers": 8394
+        "account": "liveone38",
+        "growth": -0.16549441456350847,
+        "currentFollowers": 2413
       }
     },
     "performanceHistory": {
@@ -400,13 +420,14 @@
         "lindsaybartonbarrett": 3,
         "westwharfbk": 1,
         "alfredoparedesstudio": 1,
-        "200e20th": 1
+        "200e20th": 1,
+        "lucreziabuccellati": 1
       },
       "worstPerformer": {
         "StudioCAHS": 5,
         "lrottet": 1,
         "caterinahstewart": 3,
-        "liveone38": 3,
+        "liveone38": 4,
         "bobbyanspachstudiosfoundation": 2,
         "200e20th": 1,
         "lindsaybartonbarrett": 1,
@@ -495,31 +516,41 @@
         "thebrooklyntower": 8249,
         "onedominosquare": 6045,
         "greenpointlanding": 5289
+      },
+      {
+        "Date": "2025-02-03 9:24:04",
+        "centralparktower": 77319,
+        "waldorfnyc": 49738,
+        "111west57st": 51745,
+        "jdsdevelopmentgroup": 54643,
+        "thebrooklyntower": 8251,
+        "onedominosquare": 6079,
+        "greenpointlanding": 5283
       }
     ],
     "performers": {
       "best": {
-        "account": "waldorfnyc",
-        "growth": 0.7715483897235454,
-        "currentFollowers": 49501
+        "account": "onedominosquare",
+        "growth": 0.5624483043837882,
+        "currentFollowers": 6079
       },
       "worst": {
         "account": "greenpointlanding",
-        "growth": -0.24519049415314978,
-        "currentFollowers": 5289
+        "growth": -0.11344299489506524,
+        "currentFollowers": 5283
       }
     },
     "performanceHistory": {
       "bestPerformer": {
-        "onedominosquare": 3,
+        "onedominosquare": 4,
         "waldorfnyc": 3,
         "jdsdevelopmentgroup": 1
       },
       "worstPerformer": {
-        "greenpointlanding": 4,
+        "greenpointlanding": 5,
         "111west57st": 3
       }
     }
   },
-  "lastUpdated": "2025-02-02T12:27:37.151Z"
+  "lastUpdated": "2025-02-03T12:31:33.380Z"
 }
