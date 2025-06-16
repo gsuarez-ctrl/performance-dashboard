@@ -6,4 +6,4 @@
 - Competitors - Market Share Trend OUT -- 
 - Monthly growth -- exact number of followers, not % growth --- DONE
 - Adding a tab for clients to show weekly performance, based on the data we're gonna collect. --- DONE
-- 
+- Keep adding
