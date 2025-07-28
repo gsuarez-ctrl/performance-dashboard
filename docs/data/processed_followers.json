@@ -779,19 +779,31 @@
         "moss.nyc": 4820,
         "thevillagewestnyc": 316,
         "klockeestate": 8930
+      },
+      {
+        "Date": "2025-07-28 9:38:18",
+        "reddymadedesign": null,
+        "rottetcollection": null,
+        "lrottet": null,
+        "rottetstudio": null,
+        "StudioCAHS": null,
+        "lucreziabuccellati": null,
+        "lindsaybartonbarrett": null,
+        "alfredoparedesstudio": null,
+        "bobbyanspachstudiosfoundation": null,
+        "liveone38": null,
+        "200e20th": null,
+        "westwharfbk": null,
+        "olympia_dumbo": null,
+        "thebrooklyntower": null,
+        "moss.nyc": null,
+        "thevillagewestnyc": null,
+        "klockeestate": null
       }
     ],
     "performers": {
-      "best": {
-        "account": "thevillagewestnyc",
-        "growth": 3.9473684210526314,
-        "currentFollowers": 316
-      },
-      "worst": {
-        "account": "liveone38",
-        "growth": -1.3051305130513051,
-        "currentFollowers": 2193
-      }
+      "best": null,
+      "worst": null
     },
     "performanceHistory": {
       "bestPerformer": {
@@ -1131,5 +1143,5 @@
       }
     }
   },
-  "lastUpdated": "2025-07-27T12:38:31.643Z"
+  "lastUpdated": "2025-07-28T12:42:50.338Z"
 }
