@@ -799,6 +799,26 @@
         "moss.nyc": null,
         "thevillagewestnyc": null,
         "klockeestate": null
+      },
+      {
+        "Date": "2025-08-11 9:28:56",
+        "reddymadedesign": 20403,
+        "rottetcollection": 36075,
+        "lrottet": 77071,
+        "rottetstudio": 19249,
+        "StudioCAHS": 22995,
+        "lucreziabuccellati": 31267,
+        "lindsaybartonbarrett": 5491,
+        "alfredoparedesstudio": 60879,
+        "bobbyanspachstudiosfoundation": 9559,
+        "liveone38": 1954,
+        "200e20th": 2840,
+        "westwharfbk": 2736,
+        "olympia_dumbo": 11180,
+        "thebrooklyntower": 8443,
+        "moss.nyc": 5375,
+        "thevillagewestnyc": null,
+        "klockeestate": null
       }
     ],
     "performers": {
@@ -1114,19 +1134,21 @@
         "thebrooklyntower": 8323,
         "onedominosquare": null,
         "greenpointlanding": null
+      },
+      {
+        "Date": "2025-08-11 9:35:33",
+        "centralparktower": null,
+        "waldorfnyc": null,
+        "111west57st": null,
+        "jdsdevelopmentgroup": null,
+        "thebrooklyntower": null,
+        "onedominosquare": null,
+        "greenpointlanding": null
       }
     ],
     "performers": {
-      "best": {
-        "account": "waldorfnyc",
-        "growth": 1.358462399701437,
-        "currentFollowers": 54318
-      },
-      "worst": {
-        "account": "111west57st",
-        "growth": -0.10972216779654374,
-        "currentFollowers": 50982
-      }
+      "best": null,
+      "worst": null
     },
     "performanceHistory": {
       "bestPerformer": {
@@ -1143,5 +1165,5 @@
       }
     }
   },
-  "lastUpdated": "2025-08-10T12:37:46.422Z"
+  "lastUpdated": "2025-08-11T12:41:54.119Z"
 }
