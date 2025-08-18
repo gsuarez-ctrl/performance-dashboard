@@ -819,11 +819,39 @@
         "moss.nyc": 5375,
         "thevillagewestnyc": null,
         "klockeestate": null
+      },
+      {
+        "Date": "2025-08-18 9:29:12",
+        "reddymadedesign": 20338,
+        "rottetcollection": 33873,
+        "lrottet": 74804,
+        "rottetstudio": 19262,
+        "StudioCAHS": 22924,
+        "lucreziabuccellati": 31327,
+        "lindsaybartonbarrett": 5460,
+        "alfredoparedesstudio": 61192,
+        "bobbyanspachstudiosfoundation": 9336,
+        "liveone38": 1828,
+        "200e20th": 2659,
+        "westwharfbk": 2660,
+        "olympia_dumbo": 11259,
+        "thebrooklyntower": 8462,
+        "moss.nyc": null,
+        "thevillagewestnyc": null,
+        "klockeestate": null
       }
     ],
     "performers": {
-      "best": null,
-      "worst": null
+      "best": {
+        "account": "olympia_dumbo",
+        "growth": 0.7066189624329159,
+        "currentFollowers": 11259
+      },
+      "worst": {
+        "account": "liveone38",
+        "growth": -6.448311156601842,
+        "currentFollowers": 1828
+      }
     },
     "performanceHistory": {
       "bestPerformer": {
@@ -832,7 +860,7 @@
         "alfredoparedesstudio": 5,
         "moss.nyc": 2,
         "liveone38": 1,
-        "olympia_dumbo": 1,
+        "olympia_dumbo": 2,
         "lindsaybartonbarrett": 1,
         "StudioCAHS": 1,
         "klockeestate": 1,
@@ -848,7 +876,7 @@
         "alfredoparedesstudio": 1,
         "moss.nyc": 1,
         "thevillagewestnyc": 1,
-        "liveone38": 6,
+        "liveone38": 7,
         "lindsaybartonbarrett": 2
       }
     }
@@ -1144,6 +1172,16 @@
         "thebrooklyntower": null,
         "onedominosquare": null,
         "greenpointlanding": null
+      },
+      {
+        "Date": "2025-08-18 9:35:24",
+        "centralparktower": null,
+        "waldorfnyc": null,
+        "111west57st": null,
+        "jdsdevelopmentgroup": null,
+        "thebrooklyntower": 8462,
+        "onedominosquare": null,
+        "greenpointlanding": null
       }
     ],
     "performers": {
@@ -1165,5 +1203,5 @@
       }
     }
   },
-  "lastUpdated": "2025-08-17T12:36:52.318Z"
+  "lastUpdated": "2025-08-18T12:41:00.066Z"
 }
